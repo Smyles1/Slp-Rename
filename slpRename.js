@@ -151,6 +151,9 @@ fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (
 				}
 				
 				if(!(slpPath === renamedMatch)){
+					while (fs.existsSync(path)) {
+						renamedMatch+="(1)"	
+					}
 					fs.rename(slpPath, renamedMatch, function(err) {if(err)console.log(err)})
 					if(verbose) console.log("Renamed: " + slpPath + " to " + renamedMatch)
 				}

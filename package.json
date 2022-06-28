@@ -14,7 +14,9 @@
   "pkg": {
     "scripts": [],
     "assets": [],
-    "targets": []
+    "targets": [
+      "node12-macos-x64"
+    ]
   }
 }
 
