@@ -1,0 +1,32 @@
+General Options:
+{{Stage}} {{StageShort}} {{GameMinutes}} {{GameSeconds}} {{Date}} {{Year}} {{Month}} {{MonthNum}} {Day}} {{Time}} {Platform}}
+
+1v1 Options:
+{{P1Char}} {{P1CharShort}} {{P1Color}} {{P1OfflineTag}} {{P1ConnectCode}} {{P1DisplayName}}
+{{P2Char}} {{P2CharShort}} {{P2Color}} {{P2OfflineTag}} {{P2ConnectCode}} {{P2DisplayName}}
+
+(Optional) Free For All Options(not currently available on slippi)
+{{P3Char}} {{P3CharShort}} {{P3Color}} {{P3OfflineTag}}
+{{P4Char}} {{P4CharShort}} {{P4Color}} {{P4OfflineTag}}
+
+Teams Options:
+{{T1P1Char}} {{T1P1CharShort}} {{T1P1Color}} {{T1P1OfflineTag}} {{T1P1ConnectCode}} {{T1P1DisplayName}} {{T1Color}}
+{{T1P2Char}} {{T1P2CharShort}} {{T1P2Color}} {{T1P2OfflineTag}} {{T1P2ConnectCode}} {{TP12DisplayName}}
+
+{{T2P1Char}} {{T2P1CharShort}} {{T2P1Color}} {{T2P1OfflineTag}} {{T2P1ConnectCode}} {{T2P1DisplayName}} {{T2Color}}
+{{T2P2Char}} {{T2P2CharShort}} {{T2P2Color}} {{T2P2OfflineTag}} {{T2P2ConnectCode}} {{T2P2DisplayName}}
+
+
+Replay Path (blank for current folder): /Users/myles/Desktop/dhirSort
+
+Non-Teams Replay Format: {{P1Color}} {{P1CharShort}} vs {{P2Color}} {{P2CharShort}} {{StageShort}} {{GameMinutes}}m-{{GameSeconds}}s
+    example: {{P1Color}} {{P1CharShort}} vs {{P2Color}} {{P2CharShort}} {{StageShort}} {{GameMinutes}}m-{{GameSeconds}}s
+
+Teams Replay Format: ({{T1Color}}) {{T1P1OfflineTag}} {{T1P1Char}} {{T1P2OfflineTag}} {{T1P2Char}} vs ({{T2Color}}) {{T2P1OfflineTag}} {{T2P1Char}} {{T2P2OfflineTag}} {{T2P2Char}} {{StageShort}} {{GameMinutes}}m-{{GameSeconds}}s
+    example: ({{T1Color}}) {{T1P1OfflineTag}} {{T1P1Char}} {{T1P2OfflineTag}} {{T1P2Char}} vs ({{T2Color}}) {{T2P1OfflineTag}} {{T2P1Char}} {{T2P2OfflineTag}} {{T2P2Char}} {{StageShort}} {{GameMinutes}}m-{{GameSeconds}}s
+
+This option will remove double characters and replace them with a single character (if you added a netplay code tag and the replay is offline)
+Replace Doubles (true/false): true
+Character to replace ("space" for space character): space
+
+Verbose Output (true/false): false

@@ -1,0 +1,20 @@
+{
+  "name": "slp-rename",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./slpRename.js",
+  "bin": "./slpRename.js",
+  "scripts": {
+    "start": "node ."
+  },
+  "dependencies": {
+    "@slippi/slippi-js": "^6.2.1",
+    "pkg": "^5.7.0"
+  },
+  "pkg": {
+    "scripts": [],
+    "assets": [],
+    "targets": []
+  }
+}
+
