@@ -23,10 +23,10 @@ fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (
 	const condenseCharBool = (splitData[28].substring(splitData[28].indexOf(":")+1).trim().toLocaleLowerCase().substring(0,4) === 'true')
 	const verbose = (splitData[31].substring(splitData[31].indexOf(":")+1).trim().toLocaleLowerCase().substring(0,4) === 'true')
 	const condenseChar = splitData[29].substring(splitData[29].indexOf(":")+1).trim().replace("space", " ").substring(0,1)
-	console.log("FFA Format: \r" + format1v1)
+	console.log("\x1b[35m", "FFA Format: \r" + format1v1)
 	console.log("Teams format: \r" + formatTeams)
 	console.log("Character condense: " + condenseCharBool + ", char: '" + condenseChar + "'")
-	console.log("Verbose: " + verbose)
+	console.log("Verbose: " + verbose, "\x1b[0m")
 
 	let filesCounter = 0
     fs.readdir(replayPath, function (err, files) {
@@ -45,27 +45,30 @@ fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (
     
                 let matchData = {}
 
-				if(settings === null || metadata === null){
-                    console.log("File: " + file + " could not be parsed.");
+				if(settings === null){
+                    console.log("\x1b[31m", "File: " + file + " could not be parsed.", "\x1b[0m");
                     return;
                 }
     
 				let generalFormat = ""
 
 				//General
-				let nameMinutes = Math.floor((metadata.lastFrame+120)/60/60)
-                let nameSeconds = Math.floor(((metadata.lastFrame+120)/60)-(nameMinutes*60))
-                matchData["{{GameMinutes}}"] = nameMinutes
-                matchData["{{GameSeconds}}"] = nameSeconds
-				matchData["{{Date}}"] = metadata.startAt.split("T")[0]
-				matchData["{{Year}}"] = metadata.startAt.split("T")[0].split('-')[0]
-				matchData["{{Month}}"] = metadata.startAt.split("T")[0].split('-')[1]
-				matchData["{{Day}}"] = metadata.startAt.split("T")[0].split('-')[2]
-				matchData["{{Time}}"] = metadata.startAt.split("T")[1]
-				matchData["{{TimeHours}}"] = metadata.startAt.split("T")[1].split(":")[0]
-				matchData["{{TimeMinutes}}"] = metadata.startAt.split("T")[1].split(":")[1]
-				matchData["{{TimeSeconds}}"] = metadata.startAt.split("T")[1].split(":")[2]
-				matchData["{{Platform}}"] = metadata.playedOn
+				if(!(metadata === null)){
+					let nameMinutes = Math.floor((metadata.lastFrame+120)/60/60)
+                	let nameSeconds = Math.floor(((metadata.lastFrame+120)/60)-(nameMinutes*60))
+                	matchData["{{GameMinutes}}"] = nameMinutes
+                	matchData["{{GameSeconds}}"] = nameSeconds
+					matchData["{{Date}}"] = metadata.startAt.split("T")[0]
+					matchData["{{Year}}"] = metadata.startAt.split("T")[0].split('-')[0]
+					matchData["{{Month}}"] = metadata.startAt.split("T")[0].split('-')[1]
+					matchData["{{Day}}"] = metadata.startAt.split("T")[0].split('-')[2]
+					matchData["{{Time}}"] = metadata.startAt.split("T")[1]
+					matchData["{{TimeHours}}"] = metadata.startAt.split("T")[1].split(":")[0]
+					matchData["{{TimeMinutes}}"] = metadata.startAt.split("T")[1].split(":")[1]
+					matchData["{{TimeSeconds}}"] = metadata.startAt.split("T")[1].split(":")[2]
+					matchData["{{Platform}}"] = metadata.playedOn
+				}
+				
 				matchData["{{Stage}}"] = stageSelect(settings.stageId, false)
 				matchData["{{StageShort}}"] = stageSelect(settings.stageId, true)
 
@@ -153,6 +156,7 @@ fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (
 				if(!(slpPath === renamedMatch)){
 					while (fs.existsSync(renamedMatch)) {
 						renamedMatch+="(1)"	
+						console.log("Duplicate name, adding \"(1)\"")
 					}
 					fs.rename(slpPath, renamedMatch, function(err) {if(err)console.log(err)})
 					if(verbose) console.log("Renamed: " + slpPath + " to " + renamedMatch)
@@ -160,7 +164,7 @@ fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (
 				
             }
 
-		if(filesCounter%10 == 0) console.log(Math.round(100*(filesCounter/files.length) * 100) / 100 + "%")
+		if(filesCounter%(Math.floor(files.length/100) + 1) == 0) console.log(Math.round(100*(filesCounter/files.length) * 100) / 100 + "%")
 		filesCounter+=1;
         })
     })
@@ -171,7 +175,8 @@ fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (
 function replaceFormatTags(format, data){
     let returnFormat = format.slice()
     Object.keys(data).forEach(key => {
-        returnFormat = newReplaceAll(returnFormat, key, data[key])
+		if(data.hasOwnProperty(key)) returnFormat = newReplaceAll(returnFormat, key, data[key])
+        else returnFormat = newReplaceAll(returnFormat, key, "")
     });
     return returnFormat;
 }
