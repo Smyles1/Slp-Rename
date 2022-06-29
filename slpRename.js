@@ -11,7 +11,7 @@ fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (
 	let splitData = data.split(/\r?\n/)
 
 	let replayPath = splitData[19].substring(splitData[19].indexOf(":")+1).trim()
-	if(replayPath.replace(" ", "") === ""){
+	if(replayPath.trim() === ""){
 		replayPath = path.dirname(process.execPath) + path.sep
 	} else if(!(replayPath.trim().charAt(replayPath.length-1) === path.sep)){
 		replayPath = replayPath + path.sep
@@ -158,17 +158,6 @@ fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (
 					if(verbose) console.log("Renamed: " + slpPath + " to " + renamedMatch)
 				}
 				
-
-                // else if(settings.isTeams && settings.players.length == 4){
-                // 	let nameMinutes = Math.floor((metadata.lastFrame+120)/60/60)
-                // 	let nameSeconds = Math.floor(((metadata.lastFrame+120)/60)-(nameMinutes*60))
-                //     let players = settings.players
-                //     players.sort((a, b) => (a.teamId > b.teamId) ? 1 : -1)
-                //     let colors = ["Red", "Blue", "Green"]
-                //     let renamedMatch = "(" + colors[players[0].teamId] + ") " + players[0].nametag.replace("?",'-') + " " + charSelect(players[0].characterId) + " " + players[1].nametag.replace("?",'-') + " " + charSelect(players[1].characterId) + " vs. " + "(" + colors[players[2].teamId] + ") " + players[2].nametag.replace("?",'-') + " " + charSelect(players[2].characterId) + " " + players[3].nametag.replace("?",'-') + " " + charSelect(players[3].characterId) + " " + stageSelect(settings.stageId) + " " +  nameMinutes + "m-" + nameSeconds + "s.slp";
-                // 	fs.rename(slpPath, replayPath + renamedMatch, function(err) {if(err)console.log(err)})
-                // 	slpPath = renamedMatch;
-                // }
             }
 
 		if(filesCounter%10 == 0) console.log(Math.round(100*(filesCounter/files.length) * 100) / 100 + "%")
@@ -274,7 +263,8 @@ function charSelect(char, short) { // Turns character IDs into character strings
 			if(short) return "Falcon";
             else return "Captain Falcon";
 		case 1:
-			return 'Donkey Kong';
+			if(short) return "DK";
+			else return 'Donkey Kong';
 		case 2:
 			return 'Fox';
 		case 3:
@@ -317,7 +307,7 @@ function charSelect(char, short) { // Turns character IDs into character strings
 		case 20:
 			return 'Falco';
 		case 21:
-            if(short) return "Y.Link";
+            if(short) return "YLink";
 			else return 'Young Link';
 		case 22:
             if(short) return "Doc";
