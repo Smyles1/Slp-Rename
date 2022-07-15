@@ -3,21 +3,21 @@ var fs = require('fs');
 const { dirname } = require('path');
 var path = require('path');
 
-fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (err, data) => {
+fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (err, data) => { // Opens options.txt
     if (err) {
       console.error(err);
       return;
     }
-	let splitData = data.split(/\r?\n/)
+	let splitData = data.split(/\r?\n/) // Splits the .txt file into each line for reading
 
-	let replayPath = splitData[19].substring(splitData[19].indexOf(":")+1).trim()
-	if(replayPath.trim() === ""){
+	let replayPath = splitData[19].substring(splitData[19].indexOf(":")+1).trim() // Sets the replay path from the input in options.txt
+	if(replayPath.trim() === ""){ // If path is empty, set path to the current directory of the program
 		replayPath = path.dirname(process.execPath) + path.sep
 	} else if(!(replayPath.trim().charAt(replayPath.length-1) === path.sep)){
 		replayPath = replayPath + path.sep
 	}
 
-	const format1v1 = splitData[21].substring(splitData[21].indexOf(":")+1).trim()
+	const format1v1 = splitData[21].substring(splitData[21].indexOf(":")+1).trim() // Setting config options/formats
 	const formatTeams = splitData[24].substring(splitData[24].indexOf(":")+1).trim()
 
 	const condenseCharBool = (splitData[28].substring(splitData[28].indexOf(":")+1).trim().toLocaleLowerCase().substring(0,4) === 'true')
@@ -35,7 +35,6 @@ fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (
           console.error("Directory could not be found", err);
           process.exit(1);
         }
-    
         files.forEach(function (file, index) {
             slpPath = "" + replayPath + file
             if(path.extname(slpPath) == ".slp" && !path.basename(slpPath).startsWith(".")){
@@ -152,19 +151,27 @@ fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (
 				} else {
 					renamedMatch = (path.dirname(slpPath) + path.sep + replaceFormatTags(generalFormat, matchData) + ".slp")
 				}
-				
 				if(!(slpPath === renamedMatch)){
 					while (fs.existsSync(renamedMatch)) {
 						renamedMatch+="(1)"	
-						console.log("Duplicate name, adding \"(1)\"")
+						console.log("Duplicate name, adding \"(1)\"             ")
 					}
 					fs.rename(slpPath, renamedMatch, function(err) {if(err)console.log(err)})
-					if(verbose) console.log("Renamed: " + slpPath + " to " + renamedMatch)
+					if(verbose) {
+						console.log("Renamed: " + slpPath + " to " + renamedMatch + "           ")
+					}
 				}
 				
             }
+		if(verbose && filesCounter%(Math.floor(files.length/100) + 1) == 0) {
+			console.log(Math.round(100*(filesCounter/files.length) * 100) / 100 + "%" )
+		}
+		//console.log(files.length, filesCounter)
+		if(files.length <= filesCounter+1){
+			console.log("Sorting replays...")
+			sortReplays(replayPath,replayPath)
+		}
 
-		if(filesCounter%(Math.floor(files.length/100) + 1) == 0) console.log(Math.round(100*(filesCounter/files.length) * 100) / 100 + "%")
 		filesCounter+=1;
         })
     })
@@ -187,6 +194,75 @@ function newReplaceAll(input, replace, replaceWith){
 	} else {
 		return newReplaceAll(input.replace(replace, replaceWith), replace, replaceWith)
 	}
+}
+
+function sortReplays(replayPath,basePath){
+	let slpPath = "";
+
+	fs.readdir(replayPath, function (err, files) {
+		if (err) {
+		  console.error("Could not list the directory.", err);
+		  process.exit(1);
+		}
+	
+		let tagsList = {}
+		console.log("Getting Tags...")
+		fs.mkdirSync(basePath + "No_Tags");
+		files.forEach(function (file, index) {
+			let file1 = file;
+			slpPath = "" + replayPath + file1
+			if(path.extname(slpPath) == ".slp"){
+				const game = new SlippiGame(slpPath);
+				const settings = game.getSettings();
+				let players = settings.players   
+				let noTags = true
+				players.forEach(player => {
+					if(player.nametag.length > 0){
+						noTags = false
+					}
+				})
+				if(noTags){
+					fs.copyFile(slpPath, basePath + "No_Tags" + path.sep + path.basename(slpPath), function(err) {if(err)console.log(err)})
+				}
+				let tags = []
+				settings.players.forEach(player => {
+					if(player.nametag.length > 0){
+						tags.push(player.nametag.replace("?",'？'))
+					}
+				})
+				tags.forEach(tag => {
+					if(tagsList.hasOwnProperty(tag)){
+						tagsList[tag].push(slpPath)
+					} else {
+						tagsList[tag] = [slpPath]
+					}
+				})
+			}
+		})
+		console.log("Sorting Files...")
+		Object.keys(tagsList).forEach(key => {
+			try {
+				if (!fs.existsSync(basePath + key)) {
+				  fs.mkdirSync(basePath + key);
+				  console.log("Created directory: \"" + key + "\" with " + tagsList[key].length + " files. " + path.basename(tagsList[key][0]))
+				}
+			} catch (err) {
+				console.error(err);
+			}
+		})
+		console.log("Adding files to directories...")
+		Object.keys(tagsList).forEach(key => {
+			try {
+				tagsList[key].forEach(slpPath => {
+					fs.copyFile(slpPath, basePath + key + "/" + path.basename(slpPath), (err) => {
+						if(err)console.error(err);
+					})
+				})
+			} catch (err) {
+				console.error(err);
+			}
+		})
+	})
 }
 
 function stageSelect(stage, short) { // Turns stage IDs into stage strings based on Fizzi's SLP specs

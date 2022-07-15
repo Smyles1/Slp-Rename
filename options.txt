@@ -29,4 +29,4 @@ This option will remove double characters and replace them with a single charact
 Replace Doubles (true/false): true
 Character to replace ("space" for space character): space
 
-Verbose Output (true/false): false
+Verbose Output (true/false): true
