@@ -1,6 +1,10 @@
-const { SlippiGame } = require('@slippi/slippi-js');
+const {
+	SlippiGame
+} = require('@slippi/slippi-js');
 var fs = require('fs');
-const { dirname } = require('path');
+const {
+	dirname
+} = require('path');
 var path = require('path');
 
 fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (err, data) => { // Opens options.txt
@@ -9,7 +13,6 @@ fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (
 		return;
 	}
 	let splitData = data.split(/\r?\n/) // Splits the .txt file into each line for reading
-
 	let replayPath = splitData[19].substring(splitData[19].indexOf(":") + 1).trim() // Sets the replay path from the input in options.txt
 	if (replayPath.trim() === "") { // If path is empty, set path to the current directory of the program
 		replayPath = path.dirname(process.execPath) + path.sep
@@ -23,6 +26,7 @@ fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (
 	const condenseCharBool = (splitData[28].substring(splitData[28].indexOf(":") + 1).trim().toLocaleLowerCase().substring(0, 4) === 'true')
 	const verbose = (splitData[31].substring(splitData[31].indexOf(":") + 1).trim().toLocaleLowerCase().substring(0, 4) === 'true')
 	const condenseChar = splitData[29].substring(splitData[29].indexOf(":") + 1).trim().replace("space", " ").substring(0, 1)
+
 	console.log("\x1b[35m", "FFA Format: \r" + format1v1)
 	console.log("Teams format: \r" + formatTeams)
 	console.log("Character condense: " + condenseCharBool + ", char: '" + condenseChar + "'")
@@ -35,6 +39,7 @@ fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (
 			console.error("Directory could not be found", err);
 			process.exit(1);
 		}
+		console.log("Renaming...")
 		files.forEach(function (file, index) {
 			slpPath = "" + replayPath + file
 			if (path.extname(slpPath) == ".slp" && !path.basename(slpPath).startsWith(".")) {
@@ -111,7 +116,6 @@ fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (
 					matchData["{{T1Color}}"] = ["Red", "Blue", "Green"][players[0].teamId]
 					matchData["{{T2Color}}"] = ["Red", "Blue", "Green"][players[2].teamId]
 
-
 					matchData["{{T1P1Char}}"] = charSelect(players[0].characterId, false) //Player 1
 					matchData["{{T1P1CharShort}}"] = charSelect(players[0].characterId, true)
 					matchData["{{T1P1OfflineTag}}"] = players[0].nametag.replace("?", "？")
@@ -125,7 +129,6 @@ fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (
 					matchData["{{T1P2ConnectCode}}"] = players[1].connectCode.replace("?", "？")
 					matchData["{{T1P2DisplayName}}"] = players[1].displayName.replace("?", "？")
 					matchData["{{T1P2Color}}"] = costumeSelect(players[1].characterId, players[1].characterColor)
-
 
 					matchData["{{T2P1Char}}"] = charSelect(players[2].characterId, false) //Player 3
 					matchData["{{TP1CharShort}}"] = charSelect(players[2].characterId, true)
@@ -144,7 +147,6 @@ fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (
 					generalFormat = formatTeams;
 				}
 
-
 				let renamedMatch = ""
 				if (condenseCharBool) {
 					renamedMatch = removeRepeatChar(path.dirname(slpPath) + path.sep + replaceFormatTags(generalFormat, matchData), condenseChar) + ".slp"
@@ -156,15 +158,17 @@ fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (
 						renamedMatch += "(1)"
 						console.log("Duplicate name, adding \"(1)\"             ")
 					}
-					fs.rename(slpPath, renamedMatch, function (err) { if (err) console.log(err) })
+					fs.rename(slpPath, renamedMatch, function (err) {
+						if (err) console.log(err)
+					})
 					if (verbose) {
 						console.log("Renamed: " + slpPath + " to " + renamedMatch + "           ")
 					}
 				}
 
 			}
-			if (verbose && filesCounter % (Math.floor(files.length / 100) + 1) == 0) {
-				console.log(Math.round(100 * (filesCounter / files.length) * 100) / 100 + "%")
+			if (filesCounter % (Math.floor(files.length / 100) + 1) == 0) {
+				console.log("1/3 " + Math.round(100 * (filesCounter / files.length) * 100) / 100 + "%")
 			}
 			//console.log(files.length, filesCounter)
 			if (files.length <= filesCounter + 1) {
@@ -177,8 +181,7 @@ fs.readFile(path.dirname(process.execPath) + path.sep + 'options.txt', 'utf8', (
 	})
 });
 
-
-
+// Replaces {{Tags}} with the data they represent in the format provided.
 function replaceFormatTags(format, data) {
 	let returnFormat = format.slice()
 	Object.keys(data).forEach(key => {
@@ -188,6 +191,7 @@ function replaceFormatTags(format, data) {
 	return returnFormat;
 }
 
+// Made my own replace all because the normal one wasn't working right (finally got to use recursion though pog)
 function newReplaceAll(input, replace, replaceWith) {
 	if (!(input.includes(replace))) {
 		return input
@@ -196,6 +200,7 @@ function newReplaceAll(input, replace, replaceWith) {
 	}
 }
 
+// Sorting replays into directories with tags (reused my summit 13 sorting code)
 function sortReplays(replayPath, basePath) {
 	let slpPath = "";
 
@@ -207,7 +212,13 @@ function sortReplays(replayPath, basePath) {
 
 		let tagsList = {}
 		console.log("Getting Tags...")
-		fs.mkdirSync(basePath + "No_Tags");
+
+		try {
+			fs.mkdirSync(basePath + "No_Tags");
+		} catch {
+			console.log("Please delete /No_Tags/ and try again.")
+		}
+
 		files.forEach(function (file, index) {
 			let file1 = file;
 			slpPath = "" + replayPath + file1
@@ -222,7 +233,9 @@ function sortReplays(replayPath, basePath) {
 					}
 				})
 				if (noTags) {
-					fs.copyFile(slpPath, basePath + "No_Tags" + path.sep + path.basename(slpPath), function (err) { if (err) console.log(err) })
+					fs.copyFile(slpPath, basePath + "No_Tags" + path.sep + path.basename(slpPath), function (err) {
+						if (err) console.log(err)
+					})
 				}
 				let tags = []
 				settings.players.forEach(player => {
@@ -240,7 +253,11 @@ function sortReplays(replayPath, basePath) {
 			}
 		})
 		console.log("Sorting Files...")
+		let sortIndex = 0
 		Object.keys(tagsList).forEach(key => {
+			if (sortIndex % (Math.floor(tagsList.length / 100) + 1) == 0) {
+				console.log("2/3 " + Math.round(100 * (sortIndex / tagsList.length) * 100) / 100 + "%")
+			}
 			try {
 				if (!fs.existsSync(basePath + key)) {
 					fs.mkdirSync(basePath + key);
@@ -249,9 +266,14 @@ function sortReplays(replayPath, basePath) {
 			} catch (err) {
 				console.error(err);
 			}
+			sortIndex += 1
 		})
 		console.log("Adding files to directories...")
+		let addIndex = 0
 		Object.keys(tagsList).forEach(key => {
+			if (addIndex % (Math.floor(tagsList.length / 100) + 1) == 0) {
+				console.log("3/3 " + Math.round(100 * (addIndex / tagsList.length) * 100) / 100 + "%")
+			}
 			try {
 				tagsList[key].forEach(slpPath => {
 					fs.copyFile(slpPath, basePath + key + "/" + path.basename(slpPath), (err) => {
@@ -261,11 +283,25 @@ function sortReplays(replayPath, basePath) {
 			} catch (err) {
 				console.error(err);
 			}
+			addIndex += 1
 		})
 	})
 }
 
-function stageSelect(stage, short) { // Turns stage IDs into stage strings based on Fizzi's SLP specs
+function removeRepeatChar(input, char) {
+	let outString = "";
+	let prevChar = ""
+	for (var i = 0; i < input.length; i++) {
+		if (input[i] != char || prevChar != char) {
+			outString = outString + input[i];
+		}
+		prevChar = input[i];
+	}
+	return outString
+}
+
+// Turns stage IDs into stage strings based on Fizzi's SLP specs
+function stageSelect(stage, short) {
 	switch (stage) {
 		case 2:
 			if (short) return "FoD";
@@ -338,7 +374,8 @@ function stageSelect(stage, short) { // Turns stage IDs into stage strings based
 	}
 }
 
-function charSelect(char, short) { // Turns character IDs into character strings based on Fizzi's SLP specs
+// Turns character IDs into character strings based on Fizzi's SLP specs
+function charSelect(char, short) {
 	switch (char) {
 		case 0:
 			if (short) return "Falcon";
@@ -403,7 +440,8 @@ function charSelect(char, short) { // Turns character IDs into character strings
 	}
 }
 
-function costumeSelect(char, costume) { // Turns character IDs into character strings based on Fizzi's SLP specs
+// Turns character IDs into character strings based on Fizzi's SLP specs
+function costumeSelect(char, costume) {
 	switch (char) {
 		case 0:
 			return ["Default", "Black", "Red", "White", "Green", "Blue"][costume]
@@ -458,16 +496,4 @@ function costumeSelect(char, costume) { // Turns character IDs into character st
 		case 25:
 			return ["Default", "Red", "Blue", "Green", "Purple"][costume]
 	}
-}
-
-function removeRepeatChar(input, char) {
-	let outString = "";
-	let prevChar = ""
-	for (var i = 0; i < input.length; i++) {
-		if (input[i] != char || prevChar != char) {
-			outString = outString + input[i];
-		}
-		prevChar = input[i];
-	}
-	return outString
 }
