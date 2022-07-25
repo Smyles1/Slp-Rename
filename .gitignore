@@ -1,2 +1,7 @@
 /.DS_Store
 /slpRename.code-workspace
+/package-lock.json
+/.eslintrc.js
+/.eslintrc.json
+/.prettierrc.js
+node_modules
