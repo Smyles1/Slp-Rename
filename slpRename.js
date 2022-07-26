@@ -15,7 +15,8 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
     replayPath += path.sep;
   }
 
-  const format1v1 = splitData[21].substring(splitData[21].indexOf(':') + 1).trim(); // Setting config options/formats
+  // Setting config options/formats
+  const format1v1 = splitData[21].substring(splitData[21].indexOf(':') + 1).trim();
   const formatTeams = splitData[24].substring(splitData[24].indexOf(':') + 1).trim();
 
   const condenseCharBool = (splitData[28].substring(splitData[28].indexOf(':') + 1).trim().toLocaleLowerCase().substring(0, 4) === 'true');
@@ -72,7 +73,7 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
         matchData['{{StageShort}}'] = stageSelect(settings.stageId, true);
 
         // Non-Teams
-        if (settings.isTeams === false) { // 1v1 Check
+        if (settings.isTeams === false) { // Non-teams check
           matchData['{{P1Char}}'] = charSelect(settings.players[0].characterId, false); // Player 1
           matchData['{{P1CharShort}}'] = charSelect(settings.players[0].characterId, true);
           matchData['{{P1OfflineTag}}'] = settings.players[0].nametag.replace('?', '？');
@@ -153,8 +154,8 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
             renamedMatch += '(1)';
             console.log('Duplicate name, adding "(1)"             ');
           }
-          fs.rename(slpPath, renamedMatch, (err) => {
-            if (err) console.log(err);
+          fs.rename(slpPath, renamedMatch, (rnErr) => {
+            if (rnErr) console.log(rnErr);
           });
           if (verbose) {
             console.log(`Renamed: ${slpPath} to ${renamedMatch}           `);
@@ -179,8 +180,9 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
 function replaceFormatTags(format, data) {
   let returnFormat = format.slice();
   Object.keys(data).forEach((key) => {
-    if (data.hasOwnProperty(key)) returnFormat = newReplaceAll(returnFormat, key, data[key]);
-    else returnFormat = newReplaceAll(returnFormat, key, '');
+    if (Object.prototype.hasOwnProperty.call(data, key)) {
+      returnFormat = newReplaceAll(returnFormat, key, data[key]);
+    } else returnFormat = newReplaceAll(returnFormat, key, '');
   });
   return returnFormat;
 }
@@ -227,8 +229,8 @@ function sortReplays(replayPath, basePath) {
           }
         });
         if (noTags) {
-          fs.copyFile(slpPath, `${basePath}No_Tags${path.sep}${path.basename(slpPath)}`, (err) => {
-            if (err) console.log(err);
+          fs.copyFile(slpPath, `${basePath}No_Tags${path.sep}${path.basename(slpPath)}`, (cfErr) => {
+            if (cfErr) console.log(cfErr);
           });
         }
         const tags = [];
@@ -238,7 +240,7 @@ function sortReplays(replayPath, basePath) {
           }
         });
         tags.forEach((tag) => {
-          if (tagsList.hasOwnProperty(tag)) {
+          if (Object.prototype.hasOwnProperty.call(tagsList, tag)) {
             tagsList[tag].push(slpPath);
           } else {
             tagsList[tag] = [slpPath];
@@ -257,8 +259,8 @@ function sortReplays(replayPath, basePath) {
           fs.mkdirSync(basePath + key);
           console.log(`Created directory: "${key}" with ${tagsList[key].length} files. ${path.basename(tagsList[key][0])}`);
         }
-      } catch (err) {
-        console.error(err);
+      } catch (mkErr) {
+        console.error(mkErr);
       }
       sortIndex += 1;
     });
@@ -268,15 +270,11 @@ function sortReplays(replayPath, basePath) {
       if (addIndex % (Math.floor(tagsList.length / 100) + 1) === 0) {
         console.log(`3/3 ${Math.round(100 * (addIndex / tagsList.length) * 100) / 100}%`);
       }
-      try {
-        tagsList[key].forEach((slpPath) => {
-          fs.copyFile(slpPath, `${basePath + key}/${path.basename(slpPath)}`, (err) => {
-            if (err) console.error(err);
-          });
+      tagsList[key].forEach((tagsPath) => {
+        fs.copyFile(tagsPath, `${basePath + key}/${path.basename(tagsPath)}`, (cfErr) => {
+          if (cfErr) console.error(cfErr);
         });
-      } catch (err) {
-        console.error(err);
-      }
+      });
       addIndex += 1;
     });
   });
