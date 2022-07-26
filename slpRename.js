@@ -23,156 +23,181 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
   const verbose = (splitData[31].substring(splitData[31].indexOf(':') + 1).trim().toLocaleLowerCase().substring(0, 4) === 'true');
   const condenseChar = splitData[29].substring(splitData[29].indexOf(':') + 1).trim().replace('space', ' ').substring(0, 1);
 
-  console.log('\x1b[35m', `FFA Format: \r${format1v1}`);
-  console.log(`Teams format: \r${formatTeams}`);
-  console.log(`Character condense: ${condenseCharBool}, char: '${condenseChar}'`);
-  console.log(`Verbose: ${verbose}`, '\x1b[0m');
+  const sortBool = (splitData[33].substring(splitData[33].indexOf(':') + 1).trim().toLocaleLowerCase().substring(0, 4) === 'true');
 
-  let filesCounter = 0;
-  fs.readdir(replayPath, (err1, files) => {
-    console.log(`Reading ${replayPath}`);
-    if (err) {
-      console.error('Directory could not be found', err1);
-      process.exit(1);
+  let idData = {};
+
+  // Load the json ID data
+  fs.readFile(path.join(__dirname, path.sep, 'slpids.json'), 'utf8', (jsonErr, jsonData) => {
+    if (jsonErr) {
+      console.log(`Error reading file from disk: ${jsonErr}`);
+    } else {
+    // parse JSON string to JSON object
+      idData = JSON.parse(jsonData);
+
+      console.log('\x1b[35m', `FFA Format: \r${format1v1}`);
+      console.log(`Teams format: \r${formatTeams}`);
+      console.log(`Character condense: ${condenseCharBool}, char: '${condenseChar}'`);
+      console.log(`Verbose: ${verbose}`, '\x1b[0m');
+
+      let filesCounter = 0;
+      fs.readdir(replayPath, (err1, files) => {
+        console.log(`Reading ${replayPath}`);
+        if (err) {
+          console.error('Directory could not be found', err1);
+          process.exit(1);
+        }
+        console.log('Renaming...');
+        files.forEach((file) => {
+          const slpPath = `${replayPath}${file}`;
+          if (path.extname(slpPath) === '.slp' && !path.basename(slpPath).startsWith('.')) {
+            const game = new SlippiGame(slpPath);
+            const settings = game.getSettings();
+            const metadata = game.getMetadata();
+
+            const matchData = {};
+
+            if (settings === null) {
+              console.log('\x1b[31m', `File: ${file} could not be parsed.`, '\x1b[0m');
+              return;
+            }
+
+            let generalFormat = path.basename(slpPath);
+
+            // General
+            if (!(metadata === null)) {
+              const nameMinutes = Math.floor((metadata.lastFrame + 120) / 60 / 60);
+              const nameSeconds = Math.floor(((metadata.lastFrame + 120) / 60) - nameMinutes * 60);
+              matchData['{{GameMinutes}}'] = nameMinutes;
+              matchData['{{GameSeconds}}'] = nameSeconds;
+              matchData['{{Date}}'] = metadata.startAt.split('T')[0];
+              matchData['{{Year}}'] = metadata.startAt.split('T')[0].split('-')[0];
+              matchData['{{Month}}'] = metadata.startAt.split('T')[0].split('-')[1];
+              matchData['{{Day}}'] = metadata.startAt.split('T')[0].split('-')[2];
+              matchData['{{Time}}'] = metadata.startAt.split('T')[1];
+              matchData['{{TimeHours}}'] = metadata.startAt.split('T')[1].split(':')[0];
+              matchData['{{TimeMinutes}}'] = metadata.startAt.split('T')[1].split(':')[1];
+              matchData['{{TimeSeconds}}'] = metadata.startAt.split('T')[1].split(':')[2];
+              matchData['{{Platform}}'] = metadata.playedOn;
+            }
+            matchData['{{Stage}}'] = stageSelect(idData, settings.stageId, false);
+            matchData['{{StageShort}}'] = stageSelect(idData, settings.stageId, true);
+            // Non-Teams
+            if ((!settings.isTeams) || (settings.isTeams && settings.players.length === 2)) {
+              matchData['{{P1Char}}'] = charSelect(idData, settings.players[0].characterId, false); // Player 1
+              matchData['{{P1CharShort}}'] = charSelect(idData, settings.players[0].characterId, true);
+              matchData['{{P1OfflineTag}}'] = settings.players[0].nametag.replace('?', '？');
+              matchData['{{P1ConnectCode}}'] = settings.players[0].connectCode.replace('?', '？');
+              matchData['{{P1DisplayName}}'] = settings.players[0].displayName.replace('?', '？');
+              matchData['{{P1Color}}'] = costumeSelect(idData, settings.players[0].characterId, settings.players[0].characterColor);
+
+              matchData['{{P2Char}}'] = charSelect(idData, settings.players[1].characterId, false); // Player 2
+              matchData['{{P2CharShort}}'] = charSelect(idData, settings.players[1].characterId, true);
+              matchData['{{P2OfflineTag}}'] = settings.players[1].nametag.replace('?', '？');
+              matchData['{{P2ConnectCode}}'] = settings.players[1].connectCode.replace('?', '？');
+              matchData['{{P2DisplayName}}'] = settings.players[1].displayName.replace('?', '？');
+              matchData['{{P2Color}}'] = costumeSelect(idData, settings.players[1].characterId, settings.players[1].characterColor);
+
+              if (settings.players.length > 2) {
+                matchData['{{P3Char}}'] = charSelect(idData, settings.players[2].characterId, false); // Player 3
+                matchData['{{P3CharShort}}'] = charSelect(idData, settings.players[2].characterId, true);
+                matchData['{{P3OfflineTag}}'] = settings.players[2].nametag.replace('?', '？');
+                matchData['{{P3ConnectCode}}'] = settings.players[2].connectCode.replace('?', '？');
+                matchData['{{P3DisplayName}}'] = settings.players[2].displayName.replace('?', '？');
+                matchData['{{P3Color}}'] = costumeSelect(idData, settings.players[2].characterId, settings.players[2].characterColor);
+              }
+              if (settings.players.length > 3) {
+                matchData['{{P3Char}}'] = charSelect(idData, settings.players[3].characterId, false); // Player 4
+                matchData['{{P3CharShort}}'] = charSelect(idData, settings.players[3].characterId, true);
+                matchData['{{P3OfflineTag}}'] = settings.players[3].nametag.replace('?', '？');
+                matchData['{{P3ConnectCode}}'] = settings.players[3].connectCode.replace('?', '？');
+                matchData['{{P3DisplayName}}'] = settings.players[3].displayName.replace('?', '？');
+                matchData['{{P3Color}}'] = costumeSelect(idData, settings.players[3].characterId, settings.players[3].characterColor);
+              }
+              generalFormat = format1v1;
+            } else if (settings.isTeams && settings.players.length === 4) {
+              let { players } = settings;
+              players = players.sort((a, b) => ((a.teamId > b.teamId) ? 1 : -1));
+              if (players[0].teamId === players[2].teamId) return;
+              matchData['{{T1Color}}'] = ['Red', 'Blue', 'Green'][players[0].teamId];
+              matchData['{{T2Color}}'] = ['Red', 'Blue', 'Green'][players[2].teamId];
+
+              matchData['{{T1P1Char}}'] = charSelect(idData, players[0].characterId, false); // Player 1
+              matchData['{{T1P1CharShort}}'] = charSelect(idData, players[0].characterId, true);
+              matchData['{{T1P1OfflineTag}}'] = players[0].nametag.replace('?', '？');
+              matchData['{{T1P1ConnectCode}}'] = players[0].connectCode.replace('?', '？');
+              matchData['{{T1P1DisplayName}}'] = players[0].displayName.replace('?', '？');
+              matchData['{{T1P1Color}}'] = costumeSelect(idData, players[0].characterId, players[0].characterColor);
+
+              matchData['{{T2P1Char}}'] = charSelect(idData, players[2].characterId, false); // Player 3
+              matchData['{{TP1CharShort}}'] = charSelect(idData, players[2].characterId, true);
+              matchData['{{T2P1OfflineTag}}'] = players[2].nametag.replace('?', '？');
+              matchData['{{T2P1ConnectCode}}'] = players[2].connectCode.replace('?', '？');
+              matchData['{{T2P1DisplayName}}'] = players[2].displayName.replace('?', '？');
+              matchData['{{T2P1Color}}'] = costumeSelect(idData, players[2].characterId, players[2].characterColor);
+
+              matchData['{{T1P2Char}}'] = charSelect(idData, players[1].characterId, false); // Player 2
+              matchData['{{T1P2CharShort}}'] = charSelect(idData, players[1].characterId, true);
+              matchData['{{T1P2OfflineTag}}'] = players[1].nametag.replace('?', '？');
+              matchData['{{T1P2ConnectCode}}'] = players[1].connectCode.replace('?', '？');
+              matchData['{{T1P2DisplayName}}'] = players[1].displayName.replace('?', '？');
+              matchData['{{T1P2Color}}'] = costumeSelect(idData, players[1].characterId, players[1].characterColor);
+
+              matchData['{{T2P2Char}}'] = charSelect(idData, players[3].characterId, false); // Player 4
+              matchData['{{T2P2CharShort}}'] = charSelect(idData, players[3].characterId, true);
+              matchData['{{T2P2OfflineTag}}'] = players[3].nametag.replace('?', '？');
+              matchData['{{T2P2ConnectCode}}'] = players[3].connectCode.replace('?', '？');
+              matchData['{{T2P2DisplayName}}'] = players[3].displayName.replace('?', '？');
+              matchData['{{T2P2Color}}'] = costumeSelect(idData, players[3].characterId, players[3].characterColor);
+
+              generalFormat = formatTeams;
+            }
+
+            let renamedMatch = '';
+            if (condenseCharBool) {
+              renamedMatch = `${path.dirname(slpPath) + path.sep + removeRepeatChar(replaceFormatTags(generalFormat, matchData), condenseChar).trim()}.slp`;
+            } else {
+              renamedMatch = `${path.dirname(slpPath) + path.sep + replaceFormatTags(generalFormat, matchData).trim()}.slp`;
+            }
+            if (!(slpPath === renamedMatch)) {
+              // If a file with the same name already exists, add a unique identifier
+              // (get a bunch of numbers from the game object and turn it into an identifier)
+              while (fs.existsSync(renamedMatch)) {
+                let total = 0.0;
+                JSON.stringify(game).match(/[-+]?\d*(\.(?=\d))?\d+/g).forEach((val) => {
+                  total += parseFloat(val.replace('.', ''));
+                });
+                const key = parseInt(total.toString().replace('.', '').substring(1, 11), 10);
+                renamedMatch = `${path.dirname(renamedMatch) + path.sep + path.basename(renamedMatch).substring(0, renamedMatch.indexOf('.') - 1)} ${key.toString(16)}.slp`;
+                // console.log(`Duplicate name, adding a unique identifier: ${key.toString(16)}`);
+              }
+              if (path.basename(renamedMatch).length < 10) {
+                console.log('FOUND ONE ---------------');
+                console.log(slpPath, renamedMatch);
+              }
+              fs.rename(slpPath, renamedMatch, (rnErr) => {
+                if (rnErr) console.log(rnErr);
+              });
+              if (verbose) {
+                console.log(`Renamed: ${slpPath} to ${renamedMatch}`);
+              }
+            }
+          }
+          if (filesCounter % (Math.floor(files.length / 100) + 1) === 0) {
+            console.log(`\x1b[33m 1/3 ${Math.round(100 * (filesCounter / files.length) * 100) / 100}%\x1b[0m`);
+          }
+          // Sorting Replays
+          if (files.length <= filesCounter + 1) {
+            if (sortBool) {
+              console.log('Sorting replays...');
+              sortReplays(replayPath, replayPath);
+            }
+          }
+
+          filesCounter += 1;
+        });
+      });
     }
-    console.log('Renaming...');
-    files.forEach((file) => {
-      const slpPath = `${replayPath}${file}`;
-      if (path.extname(slpPath) === '.slp' && !path.basename(slpPath).startsWith('.')) {
-        const game = new SlippiGame(slpPath);
-        const settings = game.getSettings();
-        const metadata = game.getMetadata();
-
-        const matchData = {};
-
-        if (settings === null) {
-          console.log('\x1b[31m', `File: ${file} could not be parsed.`, '\x1b[0m');
-          return;
-        }
-
-        let generalFormat = '';
-
-        // General
-        if (!(metadata === null)) {
-          const nameMinutes = Math.floor((metadata.lastFrame + 120) / 60 / 60);
-          const nameSeconds = Math.floor(((metadata.lastFrame + 120) / 60) - (nameMinutes * 60));
-          matchData['{{GameMinutes}}'] = nameMinutes;
-          matchData['{{GameSeconds}}'] = nameSeconds;
-          matchData['{{Date}}'] = metadata.startAt.split('T')[0];
-          matchData['{{Year}}'] = metadata.startAt.split('T')[0].split('-')[0];
-          matchData['{{Month}}'] = metadata.startAt.split('T')[0].split('-')[1];
-          matchData['{{Day}}'] = metadata.startAt.split('T')[0].split('-')[2];
-          matchData['{{Time}}'] = metadata.startAt.split('T')[1];
-          matchData['{{TimeHours}}'] = metadata.startAt.split('T')[1].split(':')[0];
-          matchData['{{TimeMinutes}}'] = metadata.startAt.split('T')[1].split(':')[1];
-          matchData['{{TimeSeconds}}'] = metadata.startAt.split('T')[1].split(':')[2];
-          matchData['{{Platform}}'] = metadata.playedOn;
-        }
-
-        matchData['{{Stage}}'] = stageSelect(settings.stageId, false);
-        matchData['{{StageShort}}'] = stageSelect(settings.stageId, true);
-
-        // Non-Teams
-        if (settings.isTeams === false) { // Non-teams check
-          matchData['{{P1Char}}'] = charSelect(settings.players[0].characterId, false); // Player 1
-          matchData['{{P1CharShort}}'] = charSelect(settings.players[0].characterId, true);
-          matchData['{{P1OfflineTag}}'] = settings.players[0].nametag.replace('?', '？');
-          matchData['{{P1ConnectCode}}'] = settings.players[0].connectCode.replace('?', '？');
-          matchData['{{P1DisplayName}}'] = settings.players[0].displayName.replace('?', '？');
-          matchData['{{P1Color}}'] = costumeSelect(settings.players[0].characterId, settings.players[0].characterColor);
-
-          matchData['{{P2Char}}'] = charSelect(settings.players[1].characterId, false); // Player 2
-          matchData['{{P2CharShort}}'] = charSelect(settings.players[1].characterId, true);
-          matchData['{{P2OfflineTag}}'] = settings.players[1].nametag.replace('?', '？');
-          matchData['{{P2ConnectCode}}'] = settings.players[1].connectCode.replace('?', '？');
-          matchData['{{P2DisplayName}}'] = settings.players[1].displayName.replace('?', '？');
-          matchData['{{P2Color}}'] = costumeSelect(settings.players[1].characterId, settings.players[1].characterColor);
-
-          if (settings.players.length > 2) {
-            matchData['{{P2Char}}'] = charSelect(settings.players[2].characterId, false); // Player 3
-            matchData['{{P2CharShort}}'] = charSelect(settings.players[2].characterId, true);
-            matchData['{{P2OfflineTag}}'] = settings.players[2].nametag.replace('?', '？');
-            matchData['{{P2ConnectCode}}'] = settings.players[2].connectCode.replace('?', '？');
-            matchData['{{P2DisplayName}}'] = settings.players[2].displayName.replace('?', '？');
-            matchData['{{P2Color}}'] = costumeSelect(settings.players[2].characterId, settings.players[2].characterColor);
-          }
-          if (settings.players.length > 3) {
-            matchData['{{P2Char}}'] = charSelect(settings.players[3].characterId, false); // Player 4
-            matchData['{{P2CharShort}}'] = charSelect(settings.players[3].characterId, true);
-            matchData['{{P2OfflineTag}}'] = settings.players[3].nametag.replace('?', '？');
-            matchData['{{P2ConnectCode}}'] = settings.players[3].connectCode.replace('?', '？');
-            matchData['{{P2DisplayName}}'] = settings.players[3].displayName.replace('?', '？');
-            matchData['{{P2Color}}'] = costumeSelect(settings.players[3].characterId, settings.players[3].characterColor);
-          }
-          generalFormat = format1v1;
-        } else if (settings.isTeams && settings.players.length === 4) {
-          let { players } = settings;
-          players = players.sort((a, b) => ((a.teamId > b.teamId) ? 1 : -1));
-          if (players[0].teamId === players[2].teamId) return;
-          matchData['{{T1Color}}'] = ['Red', 'Blue', 'Green'][players[0].teamId];
-          matchData['{{T2Color}}'] = ['Red', 'Blue', 'Green'][players[2].teamId];
-
-          matchData['{{T1P1Char}}'] = charSelect(players[0].characterId, false); // Player 1
-          matchData['{{T1P1CharShort}}'] = charSelect(players[0].characterId, true);
-          matchData['{{T1P1OfflineTag}}'] = players[0].nametag.replace('?', '？');
-          matchData['{{T1P1ConnectCode}}'] = players[0].connectCode.replace('?', '？');
-          matchData['{{T1P1DisplayName}}'] = players[0].displayName.replace('?', '？');
-          matchData['{{T1P1Color}}'] = costumeSelect(players[0].characterId, players[0].characterColor);
-
-          matchData['{{T1P2Char}}'] = charSelect(players[1].characterId, false); // Player 2
-          matchData['{{T1P2CharShort}}'] = charSelect(players[1].characterId, true);
-          matchData['{{T1P2OfflineTag}}'] = players[1].nametag.replace('?', '？');
-          matchData['{{T1P2ConnectCode}}'] = players[1].connectCode.replace('?', '？');
-          matchData['{{T1P2DisplayName}}'] = players[1].displayName.replace('?', '？');
-          matchData['{{T1P2Color}}'] = costumeSelect(players[1].characterId, players[1].characterColor);
-
-          matchData['{{T2P1Char}}'] = charSelect(players[2].characterId, false); // Player 3
-          matchData['{{TP1CharShort}}'] = charSelect(players[2].characterId, true);
-          matchData['{{T2P1OfflineTag}}'] = players[2].nametag.replace('?', '？');
-          matchData['{{T2P1ConnectCode}}'] = players[2].connectCode.replace('?', '？');
-          matchData['{{T2P1DisplayName}}'] = players[2].displayName.replace('?', '？');
-          matchData['{{T2P1Color}}'] = costumeSelect(players[2].characterId, players[2].characterColor);
-
-          matchData['{{T2P2Char}}'] = charSelect(players[3].characterId, false); // Player 4
-          matchData['{{T2P2CharShort}}'] = charSelect(players[3].characterId, true);
-          matchData['{{T2P2OfflineTag}}'] = players[3].nametag.replace('?', '？');
-          matchData['{{T2P2ConnectCode}}'] = players[3].connectCode.replace('?', '？');
-          matchData['{{T2P2DisplayName}}'] = players[3].displayName.replace('?', '？');
-          matchData['{{T2P2Color}}'] = costumeSelect(players[3].characterId, players[3].characterColor);
-
-          generalFormat = formatTeams;
-        }
-
-        let renamedMatch = '';
-        if (condenseCharBool) {
-          renamedMatch = `${removeRepeatChar(path.dirname(slpPath) + path.sep + replaceFormatTags(generalFormat, matchData), condenseChar)}.slp`;
-        } else {
-          renamedMatch = (`${path.dirname(slpPath) + path.sep + replaceFormatTags(generalFormat, matchData)}.slp`);
-        }
-        if (!(slpPath === renamedMatch)) {
-          while (fs.existsSync(renamedMatch)) {
-            renamedMatch += '(1)';
-            console.log('Duplicate name, adding "(1)"             ');
-          }
-          fs.rename(slpPath, renamedMatch, (rnErr) => {
-            if (rnErr) console.log(rnErr);
-          });
-          if (verbose) {
-            console.log(`Renamed: ${slpPath} to ${renamedMatch}           `);
-          }
-        }
-      }
-      if (filesCounter % (Math.floor(files.length / 100) + 1) === 0) {
-        console.log(`1/3 ${Math.round(100 * (filesCounter / files.length) * 100) / 100}%`);
-      }
-      // console.log(files.length, filesCounter)
-      if (files.length <= filesCounter + 1) {
-        console.log('Sorting replays...');
-        sortReplays(replayPath, replayPath);
-      }
-
-      filesCounter += 1;
-    });
   });
 });
 
@@ -212,7 +237,7 @@ function sortReplays(replayPath, basePath) {
     try {
       fs.mkdirSync(`${basePath}No_Tags`);
     } catch {
-      console.log('Please delete /No_Tags/ and try again.');
+      console.error('Please delete /No_Tags/ and try again.');
     }
 
     files.forEach((file) => {
@@ -230,7 +255,7 @@ function sortReplays(replayPath, basePath) {
         });
         if (noTags) {
           fs.copyFile(slpPath, `${basePath}No_Tags${path.sep}${path.basename(slpPath)}`, (cfErr) => {
-            if (cfErr) console.log(cfErr);
+            if (cfErr) console.error(cfErr);
           });
         }
         const tags = [];
@@ -252,7 +277,7 @@ function sortReplays(replayPath, basePath) {
     let sortIndex = 0;
     Object.keys(tagsList).forEach((key) => {
       if (sortIndex % (Math.floor(tagsList.length / 100) + 1) === 0) {
-        console.log(`2/3 ${Math.round(100 * (sortIndex / tagsList.length) * 100) / 100}%`);
+        console.log(`\x1b[33m2/3 ${Math.round(100 * (sortIndex / tagsList.length) * 100) / 100}%\x1b[0m`);
       }
       try {
         if (!fs.existsSync(basePath + key)) {
@@ -268,7 +293,7 @@ function sortReplays(replayPath, basePath) {
     let addIndex = 0;
     Object.keys(tagsList).forEach((key) => {
       if (addIndex % (Math.floor(tagsList.length / 100) + 1) === 0) {
-        console.log(`3/3 ${Math.round(100 * (addIndex / tagsList.length) * 100) / 100}%`);
+        console.log(`\x1b[33m3/3 ${Math.round(100 * (addIndex / tagsList.length) * 100) / 100}%\x1b[0m`);
       }
       tagsList[key].forEach((tagsPath) => {
         fs.copyFile(tagsPath, `${basePath + key}/${path.basename(tagsPath)}`, (cfErr) => {
@@ -292,209 +317,45 @@ function removeRepeatChar(input, char) {
   return outString;
 }
 
+function isObject(obj) {
+  return Object.prototype.toString.call(obj) === '[object Object]';
+}
+
 // Turns stage IDs into stage strings based on Fizzi's SLP specs
-function stageSelect(stage, short) {
-  switch (stage) {
-    case 2:
-      if (short) return 'FoD';
-      return 'Fountain of Dreams';
-    case 3:
-      if (short) return 'PS';
-      return 'Pokemon Stadium';
-    case 4:
-      return "Peach's Castle";
-    case 5:
-      return 'Kongo Jungle';
-    case 6:
-      return 'Brinstar';
-    case 7:
-      return 'Corneria';
-    case 8:
-      if (short) return 'YS';
-      return 'Yoshis Story';
-    case 9:
-      return 'Onett';
-    case 10:
-      return 'Mute City';
-    case 11:
-      return 'Rainbow Cruise';
-    case 12:
-      return 'Jungle Japes';
-    case 13:
-      return 'Great Bay';
-    case 14:
-      return 'Hyrule Temple';
-    case 15:
-      return 'Brinstar Depths';
-    case 16:
-      return "Yoshi's Island";
-    case 17:
-      return 'Green Greens';
-    case 18:
-      return 'Fourside';
-    case 19:
-      return 'Mushroom Kingdom I';
-    case 20:
-      return 'Mushroom Kingdom II';
-    case 21:
-      return 'Akaneia';
-    case 22:
-      return 'Venom';
-    case 23:
-      return 'Poke Floats';
-    case 24:
-      return 'Big Blue';
-    case 25:
-      return 'Icicle Mountain';
-    case 26:
-      return 'Icetop';
-    case 27:
-      return 'Flat zone';
-    case 28:
-      if (short) return 'DL';
-      return 'Dreamland';
-    case 29:
-      return "Yoshi's Island";
-    case 30:
-      return 'Kongo Jungle';
-    case 31:
-      if (short) return 'BF';
-      return 'Battlefield';
-    case 32:
-      if (short) return 'FD';
-      return 'Final Destination';
-    default:
-      console.log('ERROR: Unexpected stageid');
-      return 'no stage';
+function stageSelect(data, stage, short) {
+  if (Object.prototype.hasOwnProperty.call(data.stage, stage)) {
+    if (short) {
+      if (isObject(data.stage[stage])) {
+        return data.stage[stage].short;
+      }
+      return data.stage[stage];
+    }
+    if (isObject(data.stage[stage])) {
+      return data.stage[stage].long;
+    }
+    return data.stage[stage];
   }
+  return '';
 }
 
 // Turns character IDs into character strings based on Fizzi's SLP specs
-function charSelect(char, short) {
-  switch (char) {
-    case 0:
-      if (short) return 'Falcon';
-      return 'Captain Falcon';
-    case 1:
-      if (short) return 'DK';
-      return 'Donkey Kong';
-    case 2:
-      return 'Fox';
-    case 3:
-      if (short) return 'GnW';
-      return 'Mr. Game & Watch';
-    case 4:
-      return 'Kirby';
-    case 5:
-      return 'Bowser';
-    case 6:
-      return 'Link';
-    case 7:
-      return 'Luigi';
-    case 8:
-      return 'Mario';
-    case 9:
-      return 'Marth';
-    case 10:
-      return 'Mewtwo';
-    case 11:
-      return 'Ness';
-    case 12:
-      return 'Peach';
-    case 13:
-      return 'Pikachu';
-    case 14:
-      if (short) return 'Icies';
-      return 'Ice Climbers';
-    case 15:
-      if (short) return 'Puff';
-      return 'Jigglypuff';
-    case 16:
-      return 'Samus';
-    case 17:
-      return 'Yoshi';
-    case 18:
-      return 'Zelda';
-    case 19:
-      return 'Sheik';
-    case 20:
-      return 'Falco';
-    case 21:
-      if (short) return 'YLink';
-      return 'Young Link';
-    case 22:
-      if (short) return 'Doc';
-      return 'Dr. Mario';
-    case 23:
-      return 'Roy';
-    case 24:
-      return 'Pichu';
-    case 25:
-      if (short) return 'Ganon';
-      return 'Ganondorf';
-    default:
-      console.log('ERROR: Unexpected characterid');
-      return 'no character';
+function charSelect(data, char, short) {
+  if (short) {
+    if (isObject(data.character[char])) {
+      return data.character[char].short;
+    }
+    return data.character[char];
   }
+  if (isObject(data.character[char])) {
+    return data.character[char].long;
+  }
+  return data.character[char];
 }
 
 // Turns character IDs into character strings based on Fizzi's SLP specs
-function costumeSelect(char, costume) {
-  switch (char) {
-    case 0:
-      return ['Default', 'Black', 'Red', 'White', 'Green', 'Blue'][costume];
-    case 1:
-      return ['Default', 'Black', 'Red', 'Blue', 'Green'][costume];
-    case 2:
-      return ['Default', 'Red', 'Blue', 'Green'][costume];
-    case 3:
-      return ['Default', 'Red', 'Blue', 'Green'][costume];
-    case 4:
-      return ['Default', 'Yellow', 'Blue', 'Red', 'Green', 'White'][costume];
-    case 5:
-      return ['Default', 'Red', 'Blue', 'Black'][costume];
-    case 6:
-      return ['Default', 'Red', 'Blue', 'Black', 'White'][costume];
-    case 7:
-      return ['Default', 'White', 'Blue', 'Red'][costume];
-    case 8:
-      return ['Default', 'Yellow', 'Black', 'Blue', 'Green'][costume];
-    case 9:
-      return ['Default', 'Red', 'Green', 'Black', 'White'][costume];
-    case 10:
-      return ['Default', 'Red', 'Blue', 'Green'][costume];
-    case 11:
-      return ['Default', 'Yellow', 'Blue', 'Green'][costume];
-    case 12:
-      return ['Default', 'Daisy', 'White', 'Blue', 'Green'][costume];
-    case 13:
-      return ['Default', 'Red', 'Party Hat', 'Cowboy Hat'][costume];
-    case 14:
-      return ['Default', 'Green', 'Orange', 'Red'][costume];
-    case 15:
-      return ['Default', 'Red', 'Blue', 'Headband', 'Crown'][costume];
-    case 16:
-      return ['Default', 'Pink', 'Black', 'Green', 'Purple'][costume];
-    case 17:
-      return ['Default', 'Red', 'Blue', 'Yellow', 'Pink', 'Cyan'][costume];
-    case 18:
-      return ['Default', 'Red', 'Blue', 'Green', 'White'][costume];
-    case 19:
-      return ['Default', 'Red', 'Blue', 'Green', 'White'][costume];
-    case 20:
-      return ['Default', 'Red', 'Blue', 'Green'][costume];
-    case 21:
-      return ['Default', 'Red', 'Blue', 'White', 'Black'][costume];
-    case 22:
-      return ['Default', 'Red', 'Blue', 'Green', 'Black'][costume];
-    case 23:
-      return ['Default', 'Red', 'Blue', 'Green', 'Yellow'][costume];
-    case 24:
-      return ['Default', 'Red', 'Blue', 'Green'][costume];
-    case 25:
-      return ['Default', 'Red', 'Blue', 'Green', 'Purple'][costume];
-    default:
-      console.log('ERROR: invalid skin ID');
-      return ['invalid'];
+function costumeSelect(data, char, costumeNum) {
+  if (Object.prototype.hasOwnProperty.call(data.costume, char)) {
+    return data.costume[char][costumeNum];
   }
+  return '';
 }

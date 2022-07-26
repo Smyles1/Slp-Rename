@@ -1,0 +1,290 @@
+{
+  "stage": {
+    "2": {
+      "long": "Fountain of Dreams",
+      "short": "FoD"
+    },
+    "3": {
+      "long": "Pokemon Stadium",
+      "short": "PS"
+    },
+    "4": "Peach's Castle",
+    "5": "Kongo Jungle",
+    "6": "Brinstar",
+    "7": "Corneria",
+    "8": {
+      "long": "Yoshis Story",
+      "short": "YS"
+    },
+    "9": "Onett",
+    "10": "Mute City",
+    "11": "Rainbow Cruise",
+    "12": "Jungle Japes",
+    "13": "Great Bay",
+    "14": "Hyrule Temple",
+    "15": "Brinstar Depths",
+    "16": "Yoshi's Island",
+    "17": "Green Greens",
+    "18": "Fourside",
+    "19": "Mushroom Kingdom I",
+    "20": "Mushroom Kingdom II",
+    "21": "Akaneia",
+    "22": "Venom",
+    "23": "Poke Floats",
+    "24": "Big Blue",
+    "25": "Icicle Mountain",
+    "26": "Icetop",
+    "27": "Flat zone",
+    "28": {
+      "long": "Dreamland",
+      "short": "DL"
+    },
+    "29": "Yoshi's Island",
+    "30": "Kongo Jungle",
+    "31": {
+      "long": "Battlefield",
+      "short": "BF"
+    },
+    "32": {
+      "long": "Final Destination",
+      "short": "FD"
+    },
+    "84": "Target Test"
+  },
+  "character": {
+    "0": {
+      "short": "Falcon",
+      "long": "Captain Falcon"
+    },
+    "1": {
+      "short": "DK",
+      "long": "Donkey Kong"
+    },
+    "2": "Fox",
+    "3": {
+      "short": "GnW",
+      "long": "Mr. Game & Watch"
+    },
+    "4": "Kirby",
+    "5": "Bowser",
+    "6": "Link",
+    "7": "Luigi",
+    "8": "Mario",
+    "9": "Marth",
+    "10": "Mewtwo",
+    "11": "Ness",
+    "12": "Peach",
+    "13": "Pikachu",
+    "14": {
+      "short": "Icies",
+      "long": "Ice Climbers"
+    },
+    "15": {
+      "short": "Puff",
+      "long": "Jigglypuff"
+    },
+    "16": "Samus",
+    "17": "Yoshi",
+    "18": "Zelda",
+    "19": "Sheik",
+    "20": "Falco",
+    "21": {
+      "short": "YLink",
+      "long": "Young Link"
+    },
+    "22": {
+      "short": "Doc",
+      "long": "Dr. Mario"
+    },
+    "23": "Roy",
+    "24": "Pichu",
+    "25": {
+      "short": "Ganon",
+      "long": "Ganondorf"
+    },
+    "26": "Master Hand",
+    "27": "WireframeM",
+    "28": "WireframeF",
+    "29": "Giga Bowser",
+    "30": "Crazy Hand",
+    "31": "Sandbag",
+    "32": "Popo"
+  },
+  "costume": {
+    "0": [
+      "Default",
+      "Black",
+      "Red",
+      "White",
+      "Green",
+      "Blue"
+    ],
+    "1": [
+      "Default",
+      "Black",
+      "Red",
+      "Blue",
+      "Green"
+    ],
+    "2": [
+      "Default",
+      "Red",
+      "Blue",
+      "Green"
+    ],
+    "3": [
+      "Default",
+      "Red",
+      "Blue",
+      "Green"
+    ],
+    "4": [
+      "Default",
+      "Yellow",
+      "Blue",
+      "Red",
+      "Green",
+      "White"
+    ],
+    "5": [
+      "Default",
+      "Red",
+      "Blue",
+      "Black"
+    ],
+    "6": [
+      "Default",
+      "Red",
+      "Blue",
+      "Black",
+      "White"
+    ],
+    "7": [
+      "Default",
+      "White",
+      "Blue",
+      "Red"
+    ],
+    "8": [
+      "Default",
+      "Yellow",
+      "Black",
+      "Blue",
+      "Green"
+    ],
+    "9": [
+      "Default",
+      "Red",
+      "Green",
+      "Black",
+      "White"
+    ],
+    "10": [
+      "Default",
+      "Red",
+      "Blue",
+      "Green"
+    ],
+    "11": [
+      "Default",
+      "Yellow",
+      "Blue",
+      "Green"
+    ],
+    "12": [
+      "Default",
+      "Daisy",
+      "White",
+      "Blue",
+      "Green"
+    ],
+    "13": [
+      "Default",
+      "Red",
+      "Party Hat",
+      "Cowboy Hat"
+    ],
+    "14": [
+      "Default",
+      "Green",
+      "Orange",
+      "Red"
+    ],
+    "15": [
+      "Default",
+      "Red",
+      "Blue",
+      "Headband",
+      "Crown"
+    ],
+    "16": [
+      "Default",
+      "Pink",
+      "Black",
+      "Green",
+      "Purple"
+    ],
+    "17": [
+      "Default",
+      "Red",
+      "Blue",
+      "Yellow",
+      "Pink",
+      "Cyan"
+    ],
+    "18": [
+      "Default",
+      "Red",
+      "Blue",
+      "Green",
+      "White"
+    ],
+    "19": [
+      "Default",
+      "Red",
+      "Blue",
+      "Green",
+      "White"
+    ],
+    "20": [
+      "Default",
+      "Red",
+      "Blue",
+      "Green"
+    ],
+    "21": [
+      "Default",
+      "Red",
+      "Blue",
+      "White",
+      "Black"
+    ],
+    "22": [
+      "Default",
+      "Red",
+      "Blue",
+      "Green",
+      "Black"
+    ],
+    "23": [
+      "Default",
+      "Red",
+      "Blue",
+      "Green",
+      "Yellow"
+    ],
+    "24": [
+      "Default",
+      "Red",
+      "Blue",
+      "Green"
+    ],
+    "25": [
+      "Default",
+      "Red",
+      "Blue",
+      "Green",
+      "Purple"
+    ]
+  }
+}

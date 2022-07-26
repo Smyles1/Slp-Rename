@@ -13,8 +13,8 @@
   },
   "pkg": {
     "scripts": [],
-    "assets": [],
-    "targets": []
+    "assets": ["./slpids.json"],
+    "targets": ["latest-macos"]
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
