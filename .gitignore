@@ -4,4 +4,4 @@
 /.eslintrc.js
 /.eslintrc.json
 /.prettierrc.js
-node_modules
+/node_modules
