@@ -8,22 +8,34 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
     return;
   }
   const splitData = data.split(/\r?\n/); // Splits the .txt file into each line for reading
-  let replayPath = splitData[19].substring(splitData[19].indexOf(':') + 1).trim(); // Sets the replay path from the input in options.txt
-  if (replayPath.trim() === '') { // If path is empty, set path to the current directory of the program
+
+  const userSettings = {};
+  splitData.forEach((line) => {
+    console.log(line);
+    if (line.includes(':') && !(line.startsWith('#'))) {
+      const front = line.split(':')[0];
+      const back = line.split(':')[1];
+      userSettings[front] = back.trim();
+    }
+  });
+
+  let replayPath = userSettings['Replay Path (blank for current folder)']; // Sets the replay path from the input in options.txt
+  if (replayPath === '') { // If path is empty, set path to the current directory of the program
     replayPath = path.dirname(process.execPath) + path.sep;
-  } else if (!(replayPath.trim().charAt(replayPath.length - 1) === path.sep)) {
-    replayPath += path.sep;
+  } else {
+    replayPath = path.dirname(replayPath) + path.sep;
   }
 
   // Setting config options/formats
-  const format1v1 = splitData[21].substring(splitData[21].indexOf(':') + 1).trim();
-  const formatTeams = splitData[24].substring(splitData[24].indexOf(':') + 1).trim();
 
-  const condenseCharBool = (splitData[28].substring(splitData[28].indexOf(':') + 1).trim().toLocaleLowerCase().substring(0, 4) === 'true');
-  const verbose = (splitData[31].substring(splitData[31].indexOf(':') + 1).trim().toLocaleLowerCase().substring(0, 4) === 'true');
-  const condenseChar = splitData[29].substring(splitData[29].indexOf(':') + 1).trim().replace('space', ' ').substring(0, 1);
+  const format1v1 = userSettings['Non-Teams Replay Format'];
+  const formatTeams = userSettings['Teams Replay Format'];
 
-  const sortBool = (splitData[33].substring(splitData[33].indexOf(':') + 1).trim().toLocaleLowerCase().substring(0, 4) === 'true');
+  const condenseCharBool = (userSettings['Replace Doubles (true/false)'].toLocaleLowerCase().substring(0, 4) === 'true');
+  const verbose = (userSettings['Verbose output (true/false)'].toLocaleLowerCase().substring(0, 4) === 'true');
+  const condenseChar = userSettings['Character to replace ("space" for space character)'].replace('space', ' ').substring(0, 1);
+
+  const sortBool = (userSettings['Sort into tag folders (true/false)'].toLocaleLowerCase().substring(0, 4) === 'true');
 
   let idData = {};
 
