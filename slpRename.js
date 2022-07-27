@@ -23,7 +23,7 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
   if (replayPath === '') { // If path is empty, set path to the current directory of the program
     replayPath = path.dirname(process.execPath) + path.sep;
   } else {
-    replayPath = path.dirname(replayPath) + path.sep;
+    replayPath = path.dirname(replayPath) + path.sep + path.basename(replayPath) + path.sep;
   }
 
   // Setting config options/formats

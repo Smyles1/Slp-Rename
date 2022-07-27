@@ -34,6 +34,6 @@ Teams Replay Format: ({{T1Color}}) {{T1P1OfflineTag}} {{T1P1Char}} {{T1P2Offline
 Replace Doubles (true/false): true
 Character to replace ("space" for space character): space
 
-Sort into tag folders (true/false): false
+Sort into tag folders (true/false): true
 
 Verbose output (true/false): false
