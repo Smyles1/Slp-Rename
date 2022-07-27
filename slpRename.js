@@ -11,7 +11,6 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
 
   const userSettings = {};
   splitData.forEach((line) => {
-    console.log(line);
     if (line.includes(':') && !(line.startsWith('#'))) {
       const front = line.split(':')[0];
       const back = line.split(':')[1];
@@ -30,11 +29,9 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
 
   const format1v1 = userSettings['Non-Teams Replay Format'];
   const formatTeams = userSettings['Teams Replay Format'];
-
   const condenseCharBool = (userSettings['Replace Doubles (true/false)'].toLocaleLowerCase().substring(0, 4) === 'true');
   const verbose = (userSettings['Verbose output (true/false)'].toLocaleLowerCase().substring(0, 4) === 'true');
   const condenseChar = userSettings['Character to replace ("space" for space character)'].replace('space', ' ').substring(0, 1);
-
   const sortBool = (userSettings['Sort into tag folders (true/false)'].toLocaleLowerCase().substring(0, 4) === 'true');
 
   let idData = {};
@@ -42,7 +39,7 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
   // Load the json ID data
   fs.readFile(path.join(__dirname, path.sep, 'slpids.json'), 'utf8', (jsonErr, jsonData) => {
     if (jsonErr) {
-      console.log(`Error reading file from disk: ${jsonErr}`);
+      console.error(`Error reading file from disk: ${jsonErr}`);
     } else {
     // parse JSON string to JSON object
       idData = JSON.parse(jsonData);
@@ -181,11 +178,7 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
                 });
                 const key = parseInt(total.toString().replace('.', '').substring(1, 11), 10);
                 renamedMatch = `${path.dirname(renamedMatch) + path.sep + path.basename(renamedMatch).substring(0, renamedMatch.indexOf('.') - 1)} ${key.toString(16)}.slp`;
-                // console.log(`Duplicate name, adding a unique identifier: ${key.toString(16)}`);
-              }
-              if (path.basename(renamedMatch).length < 10) {
-                console.log('FOUND ONE ---------------');
-                console.log(slpPath, renamedMatch);
+                if(verbose) console.log(`Duplicate name, adding a unique identifier: ${key.toString(16)}`);
               }
               fs.rename(slpPath, renamedMatch, (rnErr) => {
                 if (rnErr) console.log(rnErr);
@@ -196,13 +189,13 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
             }
           }
           if (filesCounter % (Math.floor(files.length / 100) + 1) === 0) {
-            console.log(`\x1b[33m 1/3 ${Math.round(100 * (filesCounter / files.length) * 100) / 100}%\x1b[0m`);
+            console.log(`\x1b[33m1/3 ${Math.round(100 * (filesCounter / files.length) * 100) / 100}% ${' (' + filesCounter + ')/(' + files.length + ')'}\x1b[0m`);
           }
           // Sorting Replays
           if (files.length <= filesCounter + 1) {
             if (sortBool) {
               console.log('Sorting replays...');
-              sortReplays(replayPath, replayPath);
+              sortReplays(replayPath, replayPath, verbose);
             }
           }
 
@@ -234,7 +227,7 @@ function newReplaceAll(input, replace, replaceWith) {
 }
 
 // Sorting replays into directories with tags (reused my summit 13 sorting code)
-function sortReplays(replayPath, basePath) {
+function sortReplays(replayPath, basePath, verbose) {
   let slpPath = '';
 
   fs.readdir(replayPath, (err, files) => {
@@ -287,14 +280,14 @@ function sortReplays(replayPath, basePath) {
     });
     console.log('Sorting Files...');
     let sortIndex = 0;
-    Object.keys(tagsList).forEach((key) => {
-      if (sortIndex % (Math.floor(tagsList.length / 100) + 1) === 0) {
-        console.log(`\x1b[33m2/3 ${Math.round(100 * (sortIndex / tagsList.length) * 100) / 100}%\x1b[0m`);
+    Object.keys(tagsList).forEach((key, index, array) => {
+      if (sortIndex % (Math.floor(index / 100) + 1) === 0) {
+        console.log(`\x1b[33m2/3 ${Math.round(100 * (sortIndex / array.length) * 100) / 100}% ${' (' + index + ')/(' + array.length + ')'}\x1b[0m`);
       }
       try {
         if (!fs.existsSync(basePath + key)) {
           fs.mkdirSync(basePath + key);
-          console.log(`Created directory: "${key}" with ${tagsList[key].length} files. ${path.basename(tagsList[key][0])}`);
+          if(verbose) console.log(`Created directory: "${key}" with ${tagsList[key].length} files. ${path.basename(tagsList[key][0])}`);
         }
       } catch (mkErr) {
         console.error(mkErr);
@@ -303,9 +296,9 @@ function sortReplays(replayPath, basePath) {
     });
     console.log('Adding files to directories...');
     let addIndex = 0;
-    Object.keys(tagsList).forEach((key) => {
-      if (addIndex % (Math.floor(tagsList.length / 100) + 1) === 0) {
-        console.log(`\x1b[33m3/3 ${Math.round(100 * (addIndex / tagsList.length) * 100) / 100}%\x1b[0m`);
+    Object.keys(tagsList).forEach((key, index, array) => {
+      if (addIndex % (Math.floor(index / 100) + 1) === 0) {
+        console.log(`\x1b[33m3/3 ${Math.round(100 * (addIndex / array.length) * 100) / 100}% ${' (' + index + ')/(' + array.length + ')'}\x1b[0m`);
       }
       tagsList[key].forEach((tagsPath) => {
         fs.copyFile(tagsPath, `${basePath + key}/${path.basename(tagsPath)}`, (cfErr) => {

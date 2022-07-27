@@ -9,12 +9,16 @@
   },
   "dependencies": {
     "@slippi/slippi-js": "^6.2.1",
-    "pkg": "^5.7.0"
+    "pkg": "^5.8.0"
   },
   "pkg": {
     "scripts": [],
-    "assets": ["./slpids.json"],
-    "targets": ["latest-macos"]
+    "assets": [
+      "./slpids.json"
+    ],
+    "targets": [
+      "latest-macos"
+    ]
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
