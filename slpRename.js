@@ -86,7 +86,7 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
               matchData['{{MonthNum}}'] = parseInt(date1.getMonth(), 10) + 1;
               matchData['{{Day}}'] = date1.getDate();
               matchData['{{DayName}}'] = date1[Symbol.toPrimitive]('string').split(' ')[0];
-              matchData['{{Time}}'] = newReplaceAll(metadata.startAt.split('T')[1], ':', '-');
+              matchData['{{Time}}'] = newReplaceAll(metadata.startAt.split('T')[1], ':', '꞉').substring(0, 5);
               matchData['{{TimeHours}}'] = date1.getHours();
               matchData['{{TimeMinutes}}'] = date1.getMinutes();
               matchData['{{TimeSeconds}}'] = date1.getSeconds();
