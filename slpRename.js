@@ -216,8 +216,14 @@ function replaceFormatTags(format, data) {
   let returnFormat = format.slice();
   Object.keys(data).forEach((key) => {
     if (Object.prototype.hasOwnProperty.call(data, key)) {
-      returnFormat = newReplaceAll(returnFormat, key, data[key]);
-    } else returnFormat = newReplaceAll(returnFormat, key, '');
+      if (typeof (data[key]) === 'undefined') {
+        returnFormat = newReplaceAll(returnFormat, key, '');
+      } else {
+        returnFormat = newReplaceAll(returnFormat, key, data[key]);
+      }
+    } else {
+      returnFormat = newReplaceAll(returnFormat, key, '');
+    }
   });
   return removeExtraTags(returnFormat);
 }
