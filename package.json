@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "@slippi/slippi-js": "^6.2.1",
-    "pkg": "^5.8.0"
+    "object-hash": "^3.0.0",
+    "pkg": "^5.8.0",
+    "sha1": "^1.1.1"
   },
   "pkg": {
     "scripts": [],

@@ -1,6 +1,7 @@
 const { SlippiGame } = require('@slippi/slippi-js');
 const fs = require('fs');
 const path = require('path');
+const hash = require('object-hash');
 
 fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (err, data) => { // Opens options.txt
   if (err) {
@@ -27,8 +28,8 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
 
   // Setting config options/formats
 
-  const format1v1 = userSettings['Non-Teams Replay Format'];
-  const formatTeams = userSettings['Teams Replay Format'];
+  const format1v1 = userSettings['Non-Teams Replay Format'].replace('.slp', '');
+  const formatTeams = userSettings['Teams Replay Format'].replace('.slp', '');
   const condenseCharBool = (userSettings['Replace Doubles (true/false)'].toLocaleLowerCase().substring(0, 4) === 'true');
   const verbose = (userSettings['Verbose output (true/false)'].toLocaleLowerCase().substring(0, 4) === 'true');
   const condenseChar = userSettings['Character to replace ("space" for space character)'].replace('space', ' ').substring(0, 1);
@@ -41,7 +42,6 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
     if (jsonErr) {
       console.error(`Error reading file from disk: ${jsonErr}`);
     } else {
-    // parse JSON string to JSON object
       idData = JSON.parse(jsonData);
 
       console.log('\x1b[35m', `FFA Format: \r${format1v1}`);
@@ -63,7 +63,6 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
             const game = new SlippiGame(slpPath);
             const settings = game.getSettings();
             const metadata = game.getMetadata();
-
             const matchData = {};
 
             if (settings === null) {
@@ -79,14 +78,18 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
               const nameSeconds = Math.floor(((metadata.lastFrame + 120) / 60) - nameMinutes * 60);
               matchData['{{GameMinutes}}'] = nameMinutes;
               matchData['{{GameSeconds}}'] = nameSeconds;
+              matchData['{{ConsoleNick}}'] = metadata.consoleNick;
+              const date1 = new Date(metadata.startAt);
               matchData['{{Date}}'] = metadata.startAt.split('T')[0];
-              matchData['{{Year}}'] = metadata.startAt.split('T')[0].split('-')[0];
-              matchData['{{Month}}'] = metadata.startAt.split('T')[0].split('-')[1];
-              matchData['{{Day}}'] = metadata.startAt.split('T')[0].split('-')[2];
-              matchData['{{Time}}'] = metadata.startAt.split('T')[1];
-              matchData['{{TimeHours}}'] = metadata.startAt.split('T')[1].split(':')[0];
-              matchData['{{TimeMinutes}}'] = metadata.startAt.split('T')[1].split(':')[1];
-              matchData['{{TimeSeconds}}'] = metadata.startAt.split('T')[1].split(':')[2];
+              matchData['{{Year}}'] = date1.getFullYear();
+              matchData['{{Month}}'] = date1[Symbol.toPrimitive]('string').split(' ')[1];
+              matchData['{{MonthNum}}'] = parseInt(date1.getMonth(), 10) + 1;
+              matchData['{{Day}}'] = date1.getDate();
+              matchData['{{DayName}}'] = date1[Symbol.toPrimitive]('string').split(' ')[0];
+              matchData['{{Time}}'] = newReplaceAll(metadata.startAt.split('T')[1], ':', '-');
+              matchData['{{TimeHours}}'] = date1.getHours();
+              matchData['{{TimeMinutes}}'] = date1.getMinutes();
+              matchData['{{TimeSeconds}}'] = date1.getSeconds();
               matchData['{{Platform}}'] = metadata.playedOn;
             }
             matchData['{{Stage}}'] = stageSelect(idData, settings.stageId, false);
@@ -95,32 +98,32 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
             if ((!settings.isTeams) || (settings.isTeams && settings.players.length === 2)) {
               matchData['{{P1Char}}'] = charSelect(idData, settings.players[0].characterId, false); // Player 1
               matchData['{{P1CharShort}}'] = charSelect(idData, settings.players[0].characterId, true);
-              matchData['{{P1OfflineTag}}'] = settings.players[0].nametag.replace('?', '？');
-              matchData['{{P1ConnectCode}}'] = settings.players[0].connectCode.replace('?', '？');
-              matchData['{{P1DisplayName}}'] = settings.players[0].displayName.replace('?', '？');
+              matchData['{{P1OfflineTag}}'] = newReplaceAll(settings.players[0].nametag, '?', '？');
+              matchData['{{P1ConnectCode}}'] = newReplaceAll(settings.players[0].connectCode, '?', '？');
+              matchData['{{P1DisplayName}}'] = newReplaceAll(settings.players[0].displayName, '?', '？');
               matchData['{{P1Color}}'] = costumeSelect(idData, settings.players[0].characterId, settings.players[0].characterColor);
 
               matchData['{{P2Char}}'] = charSelect(idData, settings.players[1].characterId, false); // Player 2
               matchData['{{P2CharShort}}'] = charSelect(idData, settings.players[1].characterId, true);
-              matchData['{{P2OfflineTag}}'] = settings.players[1].nametag.replace('?', '？');
-              matchData['{{P2ConnectCode}}'] = settings.players[1].connectCode.replace('?', '？');
-              matchData['{{P2DisplayName}}'] = settings.players[1].displayName.replace('?', '？');
+              matchData['{{P2OfflineTag}}'] = newReplaceAll(settings.players[1].nametag, '?', '？');
+              matchData['{{P2ConnectCode}}'] = newReplaceAll(settings.players[1].connectCode, '?', '？');
+              matchData['{{P2DisplayName}}'] = newReplaceAll(settings.players[1].displayName, '?', '？');
               matchData['{{P2Color}}'] = costumeSelect(idData, settings.players[1].characterId, settings.players[1].characterColor);
 
               if (settings.players.length > 2) {
                 matchData['{{P3Char}}'] = charSelect(idData, settings.players[2].characterId, false); // Player 3
                 matchData['{{P3CharShort}}'] = charSelect(idData, settings.players[2].characterId, true);
-                matchData['{{P3OfflineTag}}'] = settings.players[2].nametag.replace('?', '？');
-                matchData['{{P3ConnectCode}}'] = settings.players[2].connectCode.replace('?', '？');
-                matchData['{{P3DisplayName}}'] = settings.players[2].displayName.replace('?', '？');
+                matchData['{{P3OfflineTag}}'] = newReplaceAll(settings.players[2].nametag, '?', '？');
+                matchData['{{P3ConnectCode}}'] = newReplaceAll(settings.players[2].connectCode, '?', '？');
+                matchData['{{P3DisplayName}}'] = newReplaceAll(settings.players[2].displayName, '?', '？');
                 matchData['{{P3Color}}'] = costumeSelect(idData, settings.players[2].characterId, settings.players[2].characterColor);
               }
               if (settings.players.length > 3) {
                 matchData['{{P3Char}}'] = charSelect(idData, settings.players[3].characterId, false); // Player 4
                 matchData['{{P3CharShort}}'] = charSelect(idData, settings.players[3].characterId, true);
-                matchData['{{P3OfflineTag}}'] = settings.players[3].nametag.replace('?', '？');
-                matchData['{{P3ConnectCode}}'] = settings.players[3].connectCode.replace('?', '？');
-                matchData['{{P3DisplayName}}'] = settings.players[3].displayName.replace('?', '？');
+                matchData['{{P3OfflineTag}}'] = newReplaceAll(settings.players[3].nametag, '?', '？');
+                matchData['{{P3ConnectCode}}'] = newReplaceAll(settings.players[3].connectCode, '?', '？');
+                matchData['{{P3DisplayName}}'] = newReplaceAll(settings.players[3].displayName, '?', '？');
                 matchData['{{P3Color}}'] = costumeSelect(idData, settings.players[3].characterId, settings.players[3].characterColor);
               }
               generalFormat = format1v1;
@@ -133,30 +136,30 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
 
               matchData['{{T1P1Char}}'] = charSelect(idData, players[0].characterId, false); // Player 1
               matchData['{{T1P1CharShort}}'] = charSelect(idData, players[0].characterId, true);
-              matchData['{{T1P1OfflineTag}}'] = players[0].nametag.replace('?', '？');
-              matchData['{{T1P1ConnectCode}}'] = players[0].connectCode.replace('?', '？');
-              matchData['{{T1P1DisplayName}}'] = players[0].displayName.replace('?', '？');
+              matchData['{{T1P1OfflineTag}}'] = newReplaceAll(players[0].nametag, '?', '？');
+              matchData['{{T1P1ConnectCode}}'] = newReplaceAll(players[0].connectCode, '?', '？');
+              matchData['{{T1P1DisplayName}}'] = newReplaceAll(players[0].displayName, '?', '？');
               matchData['{{T1P1Color}}'] = costumeSelect(idData, players[0].characterId, players[0].characterColor);
 
               matchData['{{T2P1Char}}'] = charSelect(idData, players[2].characterId, false); // Player 3
               matchData['{{TP1CharShort}}'] = charSelect(idData, players[2].characterId, true);
-              matchData['{{T2P1OfflineTag}}'] = players[2].nametag.replace('?', '？');
-              matchData['{{T2P1ConnectCode}}'] = players[2].connectCode.replace('?', '？');
-              matchData['{{T2P1DisplayName}}'] = players[2].displayName.replace('?', '？');
+              matchData['{{T2P1OfflineTag}}'] = newReplaceAll(players[2].nametag, '?', '？');
+              matchData['{{T2P1ConnectCode}}'] = newReplaceAll(players[2].connectCode, '?', '？');
+              matchData['{{T2P1DisplayName}}'] = newReplaceAll(players[2].displayName, '?', '？');
               matchData['{{T2P1Color}}'] = costumeSelect(idData, players[2].characterId, players[2].characterColor);
 
               matchData['{{T1P2Char}}'] = charSelect(idData, players[1].characterId, false); // Player 2
               matchData['{{T1P2CharShort}}'] = charSelect(idData, players[1].characterId, true);
-              matchData['{{T1P2OfflineTag}}'] = players[1].nametag.replace('?', '？');
-              matchData['{{T1P2ConnectCode}}'] = players[1].connectCode.replace('?', '？');
-              matchData['{{T1P2DisplayName}}'] = players[1].displayName.replace('?', '？');
+              matchData['{{T1P2OfflineTag}}'] = newReplaceAll(players[1].nametag, '?', '？');
+              matchData['{{T1P2ConnectCode}}'] = newReplaceAll(players[1].connectCode, '?', '？');
+              matchData['{{T1P2DisplayName}}'] = newReplaceAll(players[1].displayName, '?', '？');
               matchData['{{T1P2Color}}'] = costumeSelect(idData, players[1].characterId, players[1].characterColor);
 
               matchData['{{T2P2Char}}'] = charSelect(idData, players[3].characterId, false); // Player 4
               matchData['{{T2P2CharShort}}'] = charSelect(idData, players[3].characterId, true);
-              matchData['{{T2P2OfflineTag}}'] = players[3].nametag.replace('?', '？');
-              matchData['{{T2P2ConnectCode}}'] = players[3].connectCode.replace('?', '？');
-              matchData['{{T2P2DisplayName}}'] = players[3].displayName.replace('?', '？');
+              matchData['{{T2P2OfflineTag}}'] = newReplaceAll(players[3].nametag, '?', '？');
+              matchData['{{T2P2ConnectCode}}'] = newReplaceAll(players[3].connectCode, '?', '？');
+              matchData['{{T2P2DisplayName}}'] = newReplaceAll(players[3].displayName, '?', '？');
               matchData['{{T2P2Color}}'] = costumeSelect(idData, players[3].characterId, players[3].characterColor);
 
               generalFormat = formatTeams;
@@ -172,13 +175,9 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
               // If a file with the same name already exists, add a unique identifier
               // (get a bunch of numbers from the game object and turn it into an identifier)
               while (fs.existsSync(renamedMatch)) {
-                let total = 0.0;
-                JSON.stringify(game).match(/[-+]?\d*(\.(?=\d))?\d+/g).forEach((val) => {
-                  total += parseFloat(val.replace('.', ''));
-                });
-                const key = parseInt(total.toString().replace('.', '').substring(1, 11), 10);
-                renamedMatch = `${path.dirname(renamedMatch) + path.sep + path.basename(renamedMatch).substring(0, renamedMatch.indexOf('.') - 1)} ${key.toString(16)}.slp`;
-                if(verbose) console.log(`Duplicate name, adding a unique identifier: ${key.toString(16)}`);
+                const key = hash(game);
+                renamedMatch = `${path.dirname(renamedMatch) + path.sep + path.basename(renamedMatch).replace('.slp', '')} ${key.substring(0, 15)}.slp`;
+                if (verbose) console.log(`Duplicate name, adding a unique identifier: ${key.substring(0, 15)}`);
               }
               fs.rename(slpPath, renamedMatch, (rnErr) => {
                 if (rnErr) console.log(rnErr);
@@ -189,7 +188,7 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
             }
           }
           if (filesCounter % (Math.floor(files.length / 100) + 1) === 0) {
-            console.log(`\x1b[33m1/3 ${Math.round(100 * (filesCounter / files.length) * 100) / 100}% ${' (' + filesCounter + ')/(' + files.length + ')'}\x1b[0m`);
+            console.log(`\x1b[33m1/3 ${Math.round(100 * (filesCounter / files.length) * 100) / 100}% ${` (${filesCounter})/(${files.length})`}\x1b[0m`);
           }
           // Sorting Replays
           if (files.length <= filesCounter + 1) {
@@ -214,7 +213,14 @@ function replaceFormatTags(format, data) {
       returnFormat = newReplaceAll(returnFormat, key, data[key]);
     } else returnFormat = newReplaceAll(returnFormat, key, '');
   });
-  return returnFormat;
+  return removeExtraTags(returnFormat);
+}
+
+function removeExtraTags(input) {
+  if (input.includes('{{') && input.includes('}}')) {
+    return removeExtraTags(input.substring(0, input.indexOf('{{')) + input.substring(input.indexOf('}}') + 2));
+  }
+  return input;
 }
 
 // Made my own replace all because the normal one wasn't working right
@@ -282,12 +288,12 @@ function sortReplays(replayPath, basePath, verbose) {
     let sortIndex = 0;
     Object.keys(tagsList).forEach((key, index, array) => {
       if (sortIndex % (Math.floor(index / 100) + 1) === 0) {
-        console.log(`\x1b[33m2/3 ${Math.round(100 * (sortIndex / array.length) * 100) / 100}% ${' (' + index + ')/(' + array.length + ')'}\x1b[0m`);
+        console.log(`\x1b[33m2/3 ${Math.round(100 * (sortIndex / array.length) * 100) / 100}% ${` (${index})/(${array.length})`}\x1b[0m`);
       }
       try {
         if (!fs.existsSync(basePath + key)) {
           fs.mkdirSync(basePath + key);
-          if(verbose) console.log(`Created directory: "${key}" with ${tagsList[key].length} files. ${path.basename(tagsList[key][0])}`);
+          if (verbose) console.log(`Created directory: "${key}" with ${tagsList[key].length} files. ${path.basename(tagsList[key][0])}`);
         }
       } catch (mkErr) {
         console.error(mkErr);
@@ -298,7 +304,7 @@ function sortReplays(replayPath, basePath, verbose) {
     let addIndex = 0;
     Object.keys(tagsList).forEach((key, index, array) => {
       if (addIndex % (Math.floor(index / 100) + 1) === 0) {
-        console.log(`\x1b[33m3/3 ${Math.round(100 * (addIndex / array.length) * 100) / 100}% ${' (' + index + ')/(' + array.length + ')'}\x1b[0m`);
+        console.log(`\x1b[33m3/3 ${Math.round(100 * (addIndex / array.length) * 100) / 100}% ${` (${index})/(${array.length})`}\x1b[0m`);
       }
       tagsList[key].forEach((tagsPath) => {
         fs.copyFile(tagsPath, `${basePath + key}/${path.basename(tagsPath)}`, (cfErr) => {

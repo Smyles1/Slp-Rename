@@ -1,5 +1,5 @@
 # General Options:
-# {{Stage}} {{StageShort}} {{GameMinutes}} {{GameSeconds}} {{Date}} {{Year}} {{Month}} {{MonthNum}} {Day}} {{Time}} {Platform}}
+# {{Stage}} {{StageShort}} {{GameMinutes}} {{GameSeconds}} {{Date}} {{Year}} {{Month}} {{Day}} {{DayName}} {{Time}} {{Platform}} {{ConsoleNick}}
 #
 # 1v1 Options:
 # {{P1Char}} {{P1CharShort}} {{P1Color}} {{P1OfflineTag}} {{P1ConnectCode}} {{P1DisplayName}}
@@ -22,10 +22,10 @@
 
 Replay Path (blank for current folder): /Users/myles/Desktop/Battle of BC 4/
 
-Non-Teams Replay Format: {{P1ConnectCode}} {{P1OfflineTag}} {{P1Color}} {{P1CharShort}} vs {{P2ConnectCode}} {{P2OfflineTag}} {{P2Color}} {{P2CharShort}} {{StageShort}} {{GameMinutes}}m-{{GameSeconds}}s
+Non-Teams Replay Format: 
 #    example: {{P1CharShort}} vs {{P2CharShort}} {{StageShort}} {{GameMinutes}}m-{{GameSeconds}}s
 
-Teams Replay Format: ({{T1Color}}) {{T1P1OfflineTag}} {{T1P1Char}} {{T1P2OfflineTag}} {{T1P2Char}} vs ({{T2Color}}) {{T2P1OfflineTag}} {{T2P1Char}} {{T2P2OfflineTag}} {{T2P2Char}} {{StageShort}} {{GameMinutes}}m-{{GameSeconds}}s
+Teams Replay Format: 
 #    example: ({{T1Color}}) {{T1P1OfflineTag}} {{T1P1Char}} {{T1P2OfflineTag}} {{T1P2Char}} vs ({{T2Color}}) {{T2P1OfflineTag}} {{T2P1Char}} {{T2P2OfflineTag}} {{T2P2Char}} {{StageShort}} {{GameMinutes}}m-{{GameSeconds}}s
 
 
@@ -34,6 +34,6 @@ Teams Replay Format: ({{T1Color}}) {{T1P1OfflineTag}} {{T1P1Char}} {{T1P2Offline
 Replace Doubles (true/false): true
 Character to replace ("space" for space character): space
 
-Sort into tag folders (true/false): true
+Sort into tag folders (true/false): false
 
 Verbose output (true/false): false
