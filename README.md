@@ -100,4 +100,73 @@ If you get an error, please dm Smyles#4703 on discord.
 - The nickname of the wii the replay was recorded on (if applicable)
 - ex: "ubc1"
 
+### Player tags
+
+**{{P1Char}}**
+
+- Full character name of the given player
+- ex: "Captain Falcon"
+
+**{{P1CharShort}}**
+
+- Shortened character name of the given player
+- ex "Falcon"
+
+**{{P1Color}}**
+
+- Costume/color name of the given player
+- ex: "Cowboy Hat", "Red"
+
+**{{P1OfflineTag}}**
+
+- Offline tag of the given player (in game 4 character tag)
+- ex: "VEL"
+
+**{{P1ConnectCode}}**
+
+- Online connect code of the given player (slippi only)
+- ex: SM#0
+
+**{{P1DisplayName}}**
+
+- Online display name of the given player (slippi only)
+- ex: "Smyles"
+
+### Teams tags
+
+**{{T1P1Char}}**
+
+- Full character name of the given player on the given team
+- ex: "Captain Falcon"
+
+**{{T1P1CharShort}}**
+
+- Shortened character name of the given player on the given team
+- ex: "Falcon"
+
+**{{T1P1Color}}**
+
+- Costume/color name of the given player on the given team
+- ex: "Cowboy Hat", "Red"
+
+**{{T1P1OfflineTag}}**
+
+- Offline tag of the given player on the given team (in game 4 character tag)
+- ex: "VEL"
+
+**{{T1P1ConnectCode}}**
+
+- Online connect code of the given player on the given team (slippi only)
+- ex: SM#0
+
+**{{T1P1DisplayName}}**
+
+- Online display name of the given player on the given team (slippi only)
+- ex: "Smyles"
+
+**{{T1Color}}**
+
+- Team color of the given team
+- ex: "Green"
+
 **More tags coming in the future :)**
