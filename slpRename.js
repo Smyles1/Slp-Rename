@@ -52,7 +52,7 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
       let filesCounter = 0;
       fs.readdir(replayPath, (err1, files) => {
         console.log(`Reading ${replayPath}`);
-        if (err) {
+        if (err1) {
           console.error('Directory could not be found', err1);
           process.exit(1);
         }
@@ -94,6 +94,7 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
             }
             matchData['{{Stage}}'] = stageSelect(idData, settings.stageId, false);
             matchData['{{StageShort}}'] = stageSelect(idData, settings.stageId, true);
+
             // Non-Teams
             if ((!settings.isTeams) || (settings.isTeams && settings.players.length === 2)) {
               matchData['{{P1Char}}'] = charSelect(idData, settings.players[0].characterId, false); // Player 1
@@ -190,7 +191,7 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
           if (filesCounter % (Math.floor(files.length / 100) + 1) === 0) {
             console.log(`\x1b[33m1/3 ${Math.round(100 * (filesCounter / files.length) * 100) / 100}% ${` (${filesCounter})/(${files.length})`}\x1b[0m`);
           }
-          // Sorting Replays
+          // Sorting Replays (trigger on last rename)
           if (files.length <= filesCounter + 1) {
             if (sortBool) {
               console.log('Sorting replays...');
@@ -205,7 +206,12 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
   });
 });
 
-// Replaces {{Tags}} with the data they represent in the format provided.
+/**
+ * Replaces { { Tags } } with the data they represent in the format provided.
+ * @param {string} format - format including tags.
+ * @param {Object} data - object with every tag and it's corresponding data for the current replay.
+ * @returns {string} a completed string with all tags replaced with their data.
+ */
 function replaceFormatTags(format, data) {
   let returnFormat = format.slice();
   Object.keys(data).forEach((key) => {
@@ -216,6 +222,11 @@ function replaceFormatTags(format, data) {
   return removeExtraTags(returnFormat);
 }
 
+/**
+ * Removes extra { { Tags } } from a string after replacing ones with data.
+ * @param {string} input - a string with unwanted tags still in it.
+ * @returns {string} a string with all tags removed.
+ */
 function removeExtraTags(input) {
   if (input.includes('{{') && input.includes('}}')) {
     return removeExtraTags(input.substring(0, input.indexOf('{{')) + input.substring(input.indexOf('}}') + 2));
@@ -223,8 +234,13 @@ function removeExtraTags(input) {
   return input;
 }
 
-// Made my own replace all because the normal one wasn't working right
-// (finally got to use recursion though pog)
+/**
+ * Replaces all instances of a string with another string in a string.
+ * @param {string} input - the full string being acted on.
+ * @param {string} replace - a string to be replaced.
+ * @param {string} replaceWith - replacement string.
+ * @returns {string} a string with all instances of replace replaced
+ */
 function newReplaceAll(input, replace, replaceWith) {
   if (!(input.includes(replace))) {
     return input;
@@ -332,7 +348,13 @@ function isObject(obj) {
   return Object.prototype.toString.call(obj) === '[object Object]';
 }
 
-// Turns stage IDs into stage strings based on Fizzi's SLP specs
+/**
+ * Turns stage IDs into stage strings based on Fizzi's SLP spec.
+ * @param {Object} data - JSON data of IDs and their corresponding stage in Fizzi's spec.
+ * @param {number} stage - stage ID.
+ * @param {boolean} short - whether to return a short version of the stage name.
+ * @returns {string} a stage name based on the given ID.
+ */
 function stageSelect(data, stage, short) {
   if (Object.prototype.hasOwnProperty.call(data.stage, stage)) {
     if (short) {
@@ -349,7 +371,13 @@ function stageSelect(data, stage, short) {
   return '';
 }
 
-// Turns character IDs into character strings based on Fizzi's SLP specs
+/**
+ * Turns character IDs into character strings based on Fizzi's SLP spec.
+ * @param {Object} data - JSON data of IDs and their corresponding character in Fizzi's spec.
+ * @param {number} char - character id.
+ * @param {boolean} short whether to return a short version of the character name.
+ * @returns {string} a character name based on the given ID.
+ */
 function charSelect(data, char, short) {
   if (short) {
     if (isObject(data.character[char])) {
@@ -363,7 +391,13 @@ function charSelect(data, char, short) {
   return data.character[char];
 }
 
-// Turns character IDs into character strings based on Fizzi's SLP specs
+/**
+ * Turns character IDs into costume strings based on Fizzi's SLP spec.
+ * @param {Object} data - JSON data of IDs and their corresponding costume in Fizzi's spec.
+ * @param {number} char - character ID.
+ * @param {boolean} costumeNum - costume ID.
+ * @returns {string} - a character name based on the given ID.
+ */
 function costumeSelect(data, char, costumeNum) {
   if (Object.prototype.hasOwnProperty.call(data.costume, char)) {
     return data.costume[char][costumeNum];
