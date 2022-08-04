@@ -19,7 +19,7 @@ This was created by a student and has not been extensively tested (yet) although
 
 ### 1: Downloading
 
-Unzip the package in Releases for your operating system.
+Unzip the package in [Releases](https://github.com/Smyles1/Slp-Rename/releases/latest) for your operating system.
 
 ### 2: Configure (IMPORTANT)
 

@@ -22,10 +22,10 @@
 
 Replay Path (blank for current folder): /Users/myles/Desktop/Battle of BC 4/
 
-Non-Teams Replay Format: 
+Non-Teams Replay Format: {{P1CharShort}} vs {{P2CharShort}} {{StageShort}} {{GameMinutes}}m-{{GameSeconds}}s
 #    example: {{P1CharShort}} vs {{P2CharShort}} {{StageShort}} {{GameMinutes}}m-{{GameSeconds}}s
 
-Teams Replay Format: 
+Teams Replay Format: ({{T1Color}}) {{T1P1OfflineTag}} {{T1P1Char}} {{T1P2OfflineTag}} {{T1P2Char}} vs ({{T2Color}}) {{T2P1OfflineTag}} {{T2P1Char}} {{T2P2OfflineTag}} {{T2P2Char}} {{StageShort}} {{GameMinutes}}m-{{GameSeconds}}s
 #    example: ({{T1Color}}) {{T1P1OfflineTag}} {{T1P1Char}} {{T1P2OfflineTag}} {{T1P2Char}} vs ({{T2Color}}) {{T2P1OfflineTag}} {{T2P1Char}} {{T2P2OfflineTag}} {{T2P2Char}} {{StageShort}} {{GameMinutes}}m-{{GameSeconds}}s
 
 
