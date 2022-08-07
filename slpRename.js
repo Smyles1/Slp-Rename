@@ -173,8 +173,7 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
               renamedMatch = `${path.dirname(slpPath) + path.sep + replaceFormatTags(generalFormat, matchData).trim()}.slp`;
             }
             if (!(slpPath === renamedMatch)) {
-              // If a file with the same name already exists, add a unique identifier
-              // (get a bunch of numbers from the game object and turn it into an identifier)
+              // If a file with the same name already exists, add a hash for a unique identifier
               while (fs.existsSync(renamedMatch)) {
                 const key = hash(game);
                 renamedMatch = `${path.dirname(renamedMatch) + path.sep + path.basename(renamedMatch).replace('.slp', '')} ${key.substring(0, 15)}.slp`;

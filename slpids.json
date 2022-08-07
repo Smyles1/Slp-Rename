@@ -49,7 +49,7 @@
       "long": "Final Destination",
       "short": "FD"
     },
-    "84": "Target Test"
+    "84": "Homerun Contest"
   },
   "character": {
     "0": {
@@ -108,7 +108,8 @@
     "29": "Giga Bowser",
     "30": "Crazy Hand",
     "31": "Sandbag",
-    "32": "Popo"
+    "32": "Popo",
+    "33": "User Select(Event)"
   },
   "costume": {
     "0": [
