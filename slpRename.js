@@ -253,7 +253,12 @@ function newReplaceAll(input, replace, replaceWith) {
   return newReplaceAll(input.replace(replace, replaceWith), replace, replaceWith);
 }
 
-// Sorting replays into directories with tags (reused my summit 13 sorting code)
+/**
+ * Sorting replays into directories with tags (reused my summit 13 sorting code)
+ * @param {string} replayPath
+ * @param {string} basePath - same as replaypath, dw about it :)
+ * @param {boolean} verbose - verbose output boolean
+ */
 function sortReplays(replayPath, basePath, verbose) {
   let slpPath = '';
 
