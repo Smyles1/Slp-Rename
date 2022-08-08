@@ -53,7 +53,7 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
       fs.readdir(replayPath, (err1, files) => {
         console.log(`Reading ${replayPath}`);
         if (err1) {
-          console.error('Directory could not be found', err1);
+          console.error('Replay directory could not be found', err1);
           process.exit(1);
         }
         console.log('Renaming...');
@@ -188,7 +188,7 @@ fs.readFile(`${path.dirname(process.execPath) + path.sep}options.txt`, 'utf8', (
             }
           }
           if (filesCounter % (Math.floor(files.length / 100) + 1) === 0) {
-            console.log(`\x1b[33m1/3 ${Math.round(100 * (filesCounter / files.length) * 100) / 100}% ${` (${filesCounter})/(${files.length})`}\x1b[0m`);
+            console.log(`\x1b[33mRename: ${Math.round(100 * (filesCounter / files.length) * 100) / 100}% ${` (${filesCounter})/(${files.length})`}\x1b[0m`);
           }
           // Sorting Replays (trigger on last rename)
           if (files.length <= filesCounter + 1) {
@@ -309,7 +309,7 @@ function sortReplays(replayPath, basePath, verbose) {
     let sortIndex = 0;
     Object.keys(tagsList).forEach((key, index, array) => {
       if (sortIndex % (Math.floor(index / 100) + 1) === 0) {
-        console.log(`\x1b[33m2/3 ${Math.round(100 * (sortIndex / array.length) * 100) / 100}% ${` (${index})/(${array.length})`}\x1b[0m`);
+        console.log(`\x1b[33mSort: ${Math.round(100 * (sortIndex / array.length) * 100) / 100}% ${` (${index})/(${array.length})`}\x1b[0m`);
       }
       try {
         if (!fs.existsSync(basePath + key)) {
@@ -325,7 +325,7 @@ function sortReplays(replayPath, basePath, verbose) {
     let addIndex = 0;
     Object.keys(tagsList).forEach((key, index, array) => {
       if (addIndex % (Math.floor(index / 100) + 1) === 0) {
-        console.log(`\x1b[33m3/3 ${Math.round(100 * (addIndex / array.length) * 100) / 100}% ${` (${index})/(${array.length})`}\x1b[0m`);
+        console.log(`\x1b[33mAdd to dir: ${Math.round(100 * (addIndex / array.length) * 100) / 100}% ${` (${index})/(${array.length})`}\x1b[0m`);
       }
       tagsList[key].forEach((tagsPath) => {
         fs.copyFile(tagsPath, `${basePath + key}/${path.basename(tagsPath)}`, (cfErr) => {
